@@ -16,11 +16,11 @@ export const SITE = {
 
 export const NAV_LINKS = [
   { label: '首页', en: 'Home', href: '/' },
-  { label: '文章', en: 'Blog', href: '/blog' },
-  { label: '归档', en: 'Archive', href: '/archive' },
-  { label: '分类', en: 'Categories', href: '/categories' },
-  { label: '标签', en: 'Tags', href: '/tags' },
-  { label: '关于', en: 'About', href: '/about' },
+  { label: '文章', en: 'Blog', href: '/blog/' },
+  { label: '归档', en: 'Archive', href: '/archive/' },
+  { label: '分类', en: 'Categories', href: '/categories/' },
+  { label: '标签', en: 'Tags', href: '/tags/' },
+  { label: '关于', en: 'About', href: '/about/' },
 ] as const;
 
 export const CATEGORY_META: Record<

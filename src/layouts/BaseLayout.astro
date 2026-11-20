@@ -36,17 +36,9 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
 
-    <!-- Chinese Ink Wash Calligraphy & Editorial Serif Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
     <title>{pageTitle}</title>
 
-    <!-- Prevent theme flash: Default is Xuan Paper Ink Wash (light); .dark is Nocturnal Ink -->
+    <!-- Zero-flash theme init: Default is Xuan Paper Ink Wash (light); .dark is Nocturnal Ink -->
     <script is:inline>
       (function () {
         const stored = localStorage.getItem('wuji-ink-theme');
@@ -60,10 +52,7 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
   </head>
 
   <body class="relative flex flex-col min-h-screen">
-    <!-- Subtle Xuan Paper Fiber Grain -->
-    <div class="xuan-paper-grain" aria-hidden="true"></div>
-
-    <!-- Global Interactive Brush Trail + Click Ink-Bloom + Drifting Ink Petals -->
+    <!-- Auto-sleeping Interactive Ink Canvas (0% CPU when idle) -->
     <InkInteractionCanvas />
 
     <Navbar />
@@ -78,7 +67,7 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
     <!-- Image Lightbox Modal -->
     <div
       id="wuji-lightbox"
-      class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md cursor-zoom-out"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 cursor-zoom-out"
       aria-hidden="true"
     >
       <img
@@ -89,7 +78,7 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
       />
     </div>
 
-    <!-- Global Interactive Engine: Code Copy, Lightbox, Scroll Reveal, 3D Tilt Spotlight, Magnetic Buttons -->
+    <!-- Global Lightweight Interactive Engine -->
     <script>
       // 1. Code block copy buttons
       document.querySelectorAll<HTMLButtonElement>('.wuji-copy-btn').forEach((btn) => {
@@ -133,9 +122,9 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
         lightbox.classList.remove('flex');
       });
 
-      // 3. Scroll-triggered Ink Unfold Reveal (.ink-reveal)
+      // 3. Scroll-triggered Ink Unfold Reveal (GPU-only opacity + translateY)
       const revealEls = Array.from(document.querySelectorAll<HTMLElement>('.ink-reveal'));
-      if (revealEls.length > 0) {
+      if (revealEls.length > 0 && 'IntersectionObserver' in window) {
         const io = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
@@ -145,37 +134,66 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
               }
             });
           },
-          { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+          { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
         );
         revealEls.forEach((el) => io.observe(el));
+      } else {
+        revealEls.forEach((el) => el.classList.add('is-visible'));
       }
 
-      // 4. 3D Perspective Tilt + Radial Ink Spotlight on interactive cards
+      // 4. rAF-throttled 3D Tilt + Radial Ink Spotlight & Magnetic Buttons
       if (window.matchMedia('(pointer: fine)').matches) {
         document.querySelectorAll<HTMLElement>('.wuji-card-interactive').forEach((card) => {
-          card.addEventListener('pointermove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--mx', `${x}px`);
-            card.style.setProperty('--my', `${y}px`);
-            const rx = ((y / rect.height) - 0.5) * -5.5;
-            const ry = ((x / rect.width) - 0.5) * 5.5;
-            card.style.transform = `perspective(950px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-3px)`;
-          });
+          let rafPending = false;
+          let lastX = 0;
+          let lastY = 0;
+          card.addEventListener(
+            'pointermove',
+            (e) => {
+              lastX = e.clientX;
+              lastY = e.clientY;
+              if (rafPending) return;
+              rafPending = true;
+              requestAnimationFrame(() => {
+                rafPending = false;
+                const rect = card.getBoundingClientRect();
+                const x = lastX - rect.left;
+                const y = lastY - rect.top;
+                card.style.setProperty('--mx', `${x.toFixed(0)}px`);
+                card.style.setProperty('--my', `${y.toFixed(0)}px`);
+                const rx = (y / rect.height - 0.5) * -4.2;
+                const ry = (x / rect.width - 0.5) * 4.2;
+                card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-3px)`;
+              });
+            },
+            { passive: true }
+          );
           card.addEventListener('pointerleave', () => {
             card.style.transform = '';
           });
         });
 
-        // 5. Magnetic hover pull on .ink-magnetic controls
         document.querySelectorAll<HTMLElement>('.ink-magnetic').forEach((el) => {
-          el.addEventListener('pointermove', (e) => {
-            const rect = el.getBoundingClientRect();
-            const dx = (e.clientX - (rect.left + rect.width / 2)) * 0.16;
-            const dy = (e.clientY - (rect.top + rect.height / 2)) * 0.16;
-            el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
-          });
+          let rafPending = false;
+          let lastX = 0;
+          let lastY = 0;
+          el.addEventListener(
+            'pointermove',
+            (e) => {
+              lastX = e.clientX;
+              lastY = e.clientY;
+              if (rafPending) return;
+              rafPending = true;
+              requestAnimationFrame(() => {
+                rafPending = false;
+                const rect = el.getBoundingClientRect();
+                const dx = (lastX - (rect.left + rect.width / 2)) * 0.14;
+                const dy = (lastY - (rect.top + rect.height / 2)) * 0.14;
+                el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+              });
+            },
+            { passive: true }
+          );
           el.addEventListener('pointerleave', () => {
             el.style.transform = '';
           });

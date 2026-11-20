@@ -1,10 +1,9 @@
 ---
 /**
- * Global Full-Viewport Chinese Ink Wash Interactive Effects Canvas:
- * 1. Pressure/velocity-sensitive calligraphic brush trail following pointer
- * 2. Organic ink-bloom splashes, splatter droplets & water-ink ripples on click
- * 3. Drifting ink petals / bamboo wisps that swirl gently around cursor
- * 4. Custom events: `wuji-ink-splash` & `wuji-stamp-effect` for interactive controls
+ * Ultra-Lightweight, Auto-Sleeping Chinese Ink Wash Interactive Effects Canvas
+ * - Runs at 1x resolution (4x less GPU fillrate on Retina, identically soft watercolor look)
+ * - Auto-pauses rAF completely (0% CPU/GPU) once ink trails/blooms/petals settle
+ * - Instant wake on pointer move, click, splash, or seal stamp
  */
 ---
 
@@ -17,15 +16,15 @@
 <script>
   const canvas = document.getElementById('wuji-ink-fx-canvas') as HTMLCanvasElement | null;
   if (canvas) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (ctx) {
       let width = window.innerWidth;
       let height = window.innerHeight;
-      let dpr = Math.min(window.devicePixelRatio || 1, 2);
       let enabled = localStorage.getItem('wuji-ink-fx') !== 'off';
       let rafId = 0;
+      let running = false;
 
-      const pointer = { x: -999, y: -999, px: -999, py: -999, active: false };
+      const pointer = { x: -999, y: -999, active: false };
 
       interface TrailSegment {
         x1: number;
@@ -44,7 +43,6 @@
         maxR: number;
         alpha: number;
         isRed: boolean;
-        lobes: number[];
       }
 
       interface InkRipple {
@@ -64,18 +62,9 @@
         r: number;
         alpha: number;
         isRed: boolean;
-      }
-
-      interface InkPetal {
-        x: number;
-        y: number;
-        vx: number;
-        vy: number;
-        rot: number;
-        vrot: number;
-        size: number;
-        alpha: number;
-        isRed: boolean;
+        isLeaf?: boolean;
+        rot?: number;
+        vrot?: number;
       }
 
       interface FloatingSeal {
@@ -93,50 +82,45 @@
       const droplets: InkDroplet[] = [];
       const seals: FloatingSeal[] = [];
 
-      const petals: InkPetal[] = Array.from({ length: 18 }, (_, i) => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: -0.22 - Math.random() * 0.35,
-        vy: 0.25 + Math.random() * 0.42,
-        rot: Math.random() * Math.PI * 2,
-        vrot: (Math.random() - 0.5) * 0.025,
-        size: 4 + Math.random() * 6,
-        alpha: 0.16 + Math.random() * 0.24,
-        isRed: i % 5 === 0,
-      }));
-
       function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas!.width = Math.floor(width * dpr);
-        canvas!.height = Math.floor(height * dpr);
-        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // 1x buffer for soft ink washes = 4x faster on Retina displays
+        canvas!.width = width;
+        canvas!.height = height;
       }
 
-      function getPalette(isRed: boolean) {
+      function getRgb(isRed: boolean) {
         const isDark = document.documentElement.classList.contains('dark');
-        if (isRed) {
-          return isDark ? '222, 76, 68' : '185, 43, 39';
-        }
+        if (isRed) return isDark ? '222, 76, 68' : '185, 43, 39';
         return isDark ? '218, 224, 226' : '24, 28, 31';
+      }
+
+      function wake() {
+        if (!running && enabled) {
+          running = true;
+          rafId = requestAnimationFrame(draw);
+        }
       }
 
       function spawnInkSplash(x: number, y: number, isRed = false, big = false) {
         if (!enabled) return;
-        const count = big ? 3 : 1;
-        for (let c = 0; c < count; c++) {
-          const ox = big ? (Math.random() - 0.5) * 90 : 0;
-          const oy = big ? (Math.random() - 0.5) * 60 : 0;
-          const lobes = Array.from({ length: 10 }, () => 0.78 + Math.random() * 0.44);
+        blooms.push({
+          x,
+          y,
+          r: big ? 10 : 5,
+          maxR: big ? 78 : 38,
+          alpha: big ? 0.24 : 0.18,
+          isRed,
+        });
+        if (big) {
           blooms.push({
-            x: x + ox,
-            y: y + oy,
-            r: big ? 10 : 5,
-            maxR: big ? 58 + Math.random() * 52 : 28 + Math.random() * 26,
-            alpha: big ? 0.34 : 0.24,
-            isRed: isRed || (big && c === 1),
-            lobes,
+            x: x + (Math.random() - 0.5) * 60,
+            y: y + (Math.random() - 0.5) * 45,
+            r: 8,
+            maxR: 54,
+            alpha: 0.2,
+            isRed: !isRed,
           });
         }
 
@@ -144,25 +128,30 @@
           x,
           y,
           r: 6,
-          maxR: big ? 135 : 74,
-          alpha: 0.34,
+          maxR: big ? 120 : 64,
+          alpha: 0.3,
           isRed,
         });
 
-        const dropCount = big ? 28 : 11;
-        for (let i = 0; i < dropCount; i++) {
+        const count = big ? 18 : 8;
+        for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = (big ? 2.4 : 1.2) + Math.random() * (big ? 5.8 : 3.2);
+          const speed = (big ? 2.1 : 1.1) + Math.random() * (big ? 4.4 : 2.6);
+          const isLeaf = i % 3 === 0;
           droplets.push({
             x,
             y,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            r: 1.2 + Math.random() * (big ? 3.8 : 2.3),
-            alpha: 0.55 + Math.random() * 0.35,
+            r: isLeaf ? 3.5 + Math.random() * 3.5 : 1.2 + Math.random() * 2.4,
+            alpha: 0.52 + Math.random() * 0.28,
             isRed: isRed || (big && i % 4 === 0),
+            isLeaf,
+            rot: Math.random() * Math.PI * 2,
+            vrot: (Math.random() - 0.5) * 0.08,
           });
         }
+        wake();
       }
 
       function spawnStamp(x: number, y: number, text = '无极') {
@@ -171,11 +160,12 @@
           x,
           y,
           text,
-          scale: 1.75,
-          alpha: 0.96,
-          rot: (Math.random() - 0.5) * 0.24,
+          scale: 1.65,
+          alpha: 0.95,
+          rot: (Math.random() - 0.5) * 0.22,
         });
         spawnInkSplash(x, y, true, false);
+        wake();
       }
 
       function onPointerMove(e: PointerEvent) {
@@ -184,39 +174,38 @@
         const y = e.clientY;
 
         if (pointer.active) {
-          const dx = x - pointer.x;
-          const dy = y - pointer.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist > 2.2) {
-            // Brush width narrows gracefully at higher speed (like real calligraphy)
-            const w = Math.max(1.2, Math.min(7.5, 9.5 - dist * 0.14));
+          const dist = Math.hypot(x - pointer.x, y - pointer.y);
+          if (dist > 3.5) {
+            const w = Math.max(1.2, Math.min(6.5, 8.2 - dist * 0.12));
             trails.push({
               x1: pointer.x,
               y1: pointer.y,
               x2: x,
               y2: y,
               width: w,
-              alpha: 0.26,
+              alpha: 0.24,
               isRed: false,
             });
-            if (trails.length > 55) trails.shift();
+            if (trails.length > 36) trails.shift();
 
-            // Occasional subtle ink mist bead along stroke
-            if (dist > 14 && Math.random() < 0.35) {
+            // Gentle ink petal / bamboo wisp spawned along sweeping brush movement
+            if (dist > 24 && Math.random() < 0.28 && droplets.length < 40) {
               droplets.push({
                 x,
                 y,
-                vx: (Math.random() - 0.5) * 0.8,
-                vy: (Math.random() - 0.5) * 0.8 + 0.2,
-                r: 0.9 + Math.random() * 1.4,
-                alpha: 0.28,
-                isRed: false,
+                vx: (Math.random() - 0.5) * 1.1,
+                vy: 0.4 + Math.random() * 0.7,
+                r: 3 + Math.random() * 3.2,
+                alpha: 0.34,
+                isRed: Math.random() < 0.22,
+                isLeaf: true,
+                rot: Math.random() * Math.PI * 2,
+                vrot: (Math.random() - 0.5) * 0.05,
               });
             }
+            wake();
           }
         }
-        pointer.px = pointer.x;
-        pointer.py = pointer.y;
         pointer.x = x;
         pointer.y = y;
         pointer.active = true;
@@ -224,7 +213,6 @@
 
       function onPointerDown(e: PointerEvent) {
         if (!enabled) return;
-        // Skip intense splash inside inputs/modals
         const tag = (e.target as HTMLElement)?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         const isInteractive = Boolean((e.target as HTMLElement)?.closest('a, button'));
@@ -234,55 +222,17 @@
       function draw() {
         ctx!.clearRect(0, 0, width, height);
 
-        if (!enabled) {
-          rafId = requestAnimationFrame(draw);
-          return;
-        }
-
-        // 1. Drifting ink petals & bamboo wisps
-        for (const p of petals) {
-          // Gentle repulsion near pointer
-          const dx = p.x - pointer.x;
-          const dy = p.y - pointer.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < 110 && dist > 0.1) {
-            const force = ((110 - dist) / 110) * 0.16;
-            p.vx += (dx / dist) * force;
-            p.vy += (dy / dist) * force;
-          }
-
-          p.vx *= 0.985;
-          p.vy = p.vy * 0.985 + 0.008;
-          if (p.vx > -0.12) p.vx -= 0.004;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rot += p.vrot;
-
-          if (p.y > height + 20) { p.y = -15; p.x = Math.random() * width; }
-          if (p.x < -20) { p.x = width + 15; }
-          if (p.x > width + 25) { p.x = -15; }
-
-          ctx!.save();
-          ctx!.translate(p.x, p.y);
-          ctx!.rotate(p.rot);
-          ctx!.fillStyle = `rgba(${getPalette(p.isRed)}, ${p.alpha})`;
-          ctx!.beginPath();
-          ctx!.ellipse(0, 0, p.size, p.size * 0.36, 0, 0, Math.PI * 2);
-          ctx!.fill();
-          ctx!.restore();
-        }
-
-        // 2. Calligraphic brush trail
+        // 1. Brush trail
         ctx!.lineCap = 'round';
         for (let i = trails.length - 1; i >= 0; i--) {
           const s = trails[i];
-          s.alpha -= 0.0095;
-          s.width *= 0.985;
-          if (s.alpha <= 0.005) {
+          s.alpha -= 0.012;
+          s.width *= 0.98;
+          if (s.alpha <= 0.008) {
             trails.splice(i, 1);
             continue;
           }
-          ctx!.strokeStyle = `rgba(${getPalette(s.isRed)}, ${s.alpha})`;
+          ctx!.strokeStyle = `rgba(${getRgb(s.isRed)}, ${s.alpha})`;
           ctx!.lineWidth = s.width;
           ctx!.beginPath();
           ctx!.moveTo(s.x1, s.y1);
@@ -290,78 +240,76 @@
           ctx!.stroke();
         }
 
-        // 3. Organic ink blooms
+        // 2. Soft concentric ink blooms (no expensive gradient allocation per frame)
         for (let i = blooms.length - 1; i >= 0; i--) {
           const b = blooms[i];
-          b.r += (b.maxR - b.r) * 0.085;
-          b.alpha -= 0.0045;
-          if (b.alpha <= 0.004) {
+          b.r += (b.maxR - b.r) * 0.1;
+          b.alpha -= 0.006;
+          if (b.alpha <= 0.006) {
             blooms.splice(i, 1);
             continue;
           }
-
-          ctx!.save();
-          ctx!.translate(b.x, b.y);
-          const grad = ctx!.createRadialGradient(0, 0, b.r * 0.1, 0, 0, b.r);
-          const rgb = getPalette(b.isRed);
-          grad.addColorStop(0, `rgba(${rgb}, ${b.alpha})`);
-          grad.addColorStop(0.65, `rgba(${rgb}, ${b.alpha * 0.55})`);
-          grad.addColorStop(1, `rgba(${rgb}, 0)`);
-          ctx!.fillStyle = grad;
+          const rgb = getRgb(b.isRed);
+          ctx!.fillStyle = `rgba(${rgb}, ${b.alpha * 0.45})`;
           ctx!.beginPath();
-          const n = b.lobes.length;
-          for (let k = 0; k <= n; k++) {
-            const ang = (k / n) * Math.PI * 2;
-            const rad = b.r * b.lobes[k % n];
-            const px = Math.cos(ang) * rad;
-            const py = Math.sin(ang) * rad;
-            if (k === 0) ctx!.moveTo(px, py);
-            else ctx!.lineTo(px, py);
-          }
-          ctx!.closePath();
+          ctx!.arc(b.x, b.y, b.r, 0, Math.PI * 2);
           ctx!.fill();
-          ctx!.restore();
+          ctx!.fillStyle = `rgba(${rgb}, ${b.alpha * 0.7})`;
+          ctx!.beginPath();
+          ctx!.arc(b.x, b.y, b.r * 0.56, 0, Math.PI * 2);
+          ctx!.fill();
         }
 
-        // 4. Water-ink ripples
+        // 3. Water-ink ripples
         for (let i = ripples.length - 1; i >= 0; i--) {
           const r = ripples[i];
-          r.r += (r.maxR - r.r) * 0.08;
-          r.alpha -= 0.008;
-          if (r.alpha <= 0.005) {
+          r.r += (r.maxR - r.r) * 0.095;
+          r.alpha -= 0.009;
+          if (r.alpha <= 0.006) {
             ripples.splice(i, 1);
             continue;
           }
-          ctx!.strokeStyle = `rgba(${getPalette(r.isRed)}, ${r.alpha})`;
-          ctx!.lineWidth = 1.25;
+          ctx!.strokeStyle = `rgba(${getRgb(r.isRed)}, ${r.alpha})`;
+          ctx!.lineWidth = 1.2;
           ctx!.beginPath();
           ctx!.arc(r.x, r.y, r.r, 0, Math.PI * 2);
           ctx!.stroke();
         }
 
-        // 5. Splatter droplets
+        // 4. Ink droplets & bamboo petals
         for (let i = droplets.length - 1; i >= 0; i--) {
           const d = droplets[i];
           d.x += d.vx;
           d.y += d.vy;
-          d.vx *= 0.93;
-          d.vy = d.vy * 0.93 + 0.05;
-          d.alpha -= 0.015;
+          d.vx *= 0.94;
+          d.vy = d.vy * 0.94 + 0.04;
+          d.alpha -= d.isLeaf ? 0.009 : 0.016;
           if (d.alpha <= 0.01) {
             droplets.splice(i, 1);
             continue;
           }
-          ctx!.fillStyle = `rgba(${getPalette(d.isRed)}, ${d.alpha})`;
-          ctx!.beginPath();
-          ctx!.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-          ctx!.fill();
+          ctx!.fillStyle = `rgba(${getRgb(d.isRed)}, ${d.alpha})`;
+          if (d.isLeaf) {
+            d.rot = (d.rot || 0) + (d.vrot || 0);
+            ctx!.save();
+            ctx!.translate(d.x, d.y);
+            ctx!.rotate(d.rot);
+            ctx!.beginPath();
+            ctx!.ellipse(0, 0, d.r, d.r * 0.36, 0, 0, Math.PI * 2);
+            ctx!.fill();
+            ctx!.restore();
+          } else {
+            ctx!.beginPath();
+            ctx!.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+            ctx!.fill();
+          }
         }
 
-        // 6. Floating animated vermilion seals (落印特效)
+        // 5. Animated vermilion seals
         for (let i = seals.length - 1; i >= 0; i--) {
           const s = seals[i];
-          s.scale += (1 - s.scale) * 0.18;
-          s.alpha -= 0.0052;
+          s.scale += (1 - s.scale) * 0.2;
+          s.alpha -= 0.0065;
           if (s.alpha <= 0.01) {
             seals.splice(i, 1);
             continue;
@@ -379,14 +327,27 @@
           ctx!.fill();
           ctx!.stroke();
           ctx!.fillStyle = '#fbf4ea';
-          ctx!.font = '20px "Ma Shan Zheng", "Noto Serif SC", serif';
+          ctx!.font = '600 18px "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif';
           ctx!.textAlign = 'center';
           ctx!.textBaseline = 'middle';
-          ctx!.fillText(s.text, 0, 2);
+          ctx!.fillText(s.text, 0, 1);
           ctx!.restore();
         }
 
-        rafId = requestAnimationFrame(draw);
+        // Auto-sleep when idle!
+        const hasWork =
+          trails.length > 0 ||
+          blooms.length > 0 ||
+          ripples.length > 0 ||
+          droplets.length > 0 ||
+          seals.length > 0;
+
+        if (hasWork && enabled) {
+          rafId = requestAnimationFrame(draw);
+        } else {
+          running = false;
+          ctx!.clearRect(0, 0, width, height);
+        }
       }
 
       resize();
@@ -402,6 +363,9 @@
           ripples.length = 0;
           droplets.length = 0;
           seals.length = 0;
+          if (rafId) cancelAnimationFrame(rafId);
+          running = false;
+          ctx!.clearRect(0, 0, width, height);
         }
       }) as EventListener);
 
@@ -423,8 +387,6 @@
           d.text || '无极'
         );
       }) as EventListener);
-
-      draw();
     }
   }
 </script>

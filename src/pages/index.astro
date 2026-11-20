@@ -48,7 +48,7 @@ const latestPosts = posts.slice(0, 6);
         <button
           id="wuji-motto-btn"
           type="button"
-          class="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)]/80 backdrop-blur-md text-xs text-[var(--text-secondary)] hover:border-[var(--accent-seal)]/55 transition-all mb-7 cursor-pointer"
+          class="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)]/92 text-xs text-[var(--text-secondary)] hover:border-[var(--accent-seal)]/55 transition-colors mb-7 cursor-pointer"
           title="点击切换无极诗笺"
         >
           <span class="wuji-seal w-4.5 h-4.5 text-[10px]">签</span>
@@ -84,7 +84,7 @@ const latestPosts = posts.slice(0, 6);
         <!-- Primary Magnetic CTAs -->
         <div class="mt-9 flex flex-wrap items-center gap-3.5">
           <a
-            href="/blog"
+            href="/blog/"
             class="ink-magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm text-[#fbf6ee] shadow-[0_12px_28px_-10px_rgba(185,43,39,0.55)] cursor-pointer"
             style="background: linear-gradient(135deg, #c93832 0%, #a6231f 100%);"
           >
@@ -93,22 +93,22 @@ const latestPosts = posts.slice(0, 6);
           </a>
 
           <a
-            href="/archive"
-            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-strong)] bg-[var(--bg-surface)]/85 backdrop-blur-md text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-colors"
+            href="/archive/"
+            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-strong)] bg-[var(--bg-surface)]/92 text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-colors"
           >
             <span>岁月归档</span>
           </a>
 
           <a
-            href="/about"
-            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-hairline)] bg-[var(--bg-surface)]/55 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
+            href="/about/"
+            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
           >
             <span>关于无极</span>
           </a>
         </div>
 
         <!-- Interactive Ink-Wash Studio Bar (水墨雅玩互动台) -->
-        <div class="mt-8 inline-flex flex-wrap items-center gap-2 p-2 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/78 backdrop-blur-md shadow-sm">
+        <div class="mt-8 inline-flex flex-wrap items-center gap-2 p-2 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92 shadow-sm">
           <span class="px-2.5 text-[11px] font-mono text-[var(--text-muted)] tracking-wider">
             ✦ 雅玩互动
           </span>
@@ -145,21 +145,21 @@ const latestPosts = posts.slice(0, 6);
 
       <!-- Telemetry Stats Strip -->
       <div class="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl">
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md">
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
           <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.postCount}</div>
           <div class="text-xs text-[var(--text-muted)] mt-0.5">藏卷篇数 · Posts</div>
         </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md">
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
           <div class="text-2xl font-bold font-mono text-[var(--accent-seal)]">
             {(stats.totalWords / 1000).toFixed(1)}k
           </div>
           <div class="text-xs text-[var(--text-muted)] mt-0.5">笔耕字数 · Words</div>
         </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md">
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
           <div class="text-2xl font-bold font-mono text-[var(--accent-jade)]">{stats.categoryCount}</div>
           <div class="text-xs text-[var(--text-muted)] mt-0.5">专题卷目 · Topics</div>
         </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md">
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
           <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.tagCount}</div>
           <div class="text-xs text-[var(--text-muted)] mt-0.5">知识墨签 · Tags</div>
         </div>

@@ -144,7 +144,7 @@
         const isSelected = idx === activeIdx;
         return `
           <a
-            href="/blog/${item.slug}"
+            href="/blog/${item.slug}/"
             data-search-idx="${idx}"
             class="wuji-search-item block p-3.5 rounded-xl border transition-all ${
               isSelected
@@ -239,7 +239,7 @@
       updateActiveHighlight();
     } else if (e.key === 'Enter' && currentMatches[activeIdx]) {
       e.preventDefault();
-      window.location.href = `/blog/${currentMatches[activeIdx].slug}`;
+      window.location.href = `/blog/${currentMatches[activeIdx].slug}/`;
     }
   });
 </script>

@@ -27,11 +27,11 @@
   --border-strong: rgba(24, 28, 31, 0.24);
   --shadow-card: 0 18px 44px -24px rgba(24, 28, 31, 0.22);
   --spotlight-color: rgba(24, 28, 31, 0.065);
-  --font-sans: "Noto Serif SC", "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
-  --font-serif: "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
-  --font-calligraphy: "Ma Shan Zheng", "Zhi Mang Xing", "STKaiti", "KaiTi", "Noto Serif SC", serif;
-  --font-display: "Ma Shan Zheng", "Noto Serif SC", serif;
-  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
+  --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", Georgia, serif;
+  --font-calligraphy: "Kaiti SC", "STKaiti", "KaiTi", "BiauKai", "DFKai-SB", "Songti SC", serif;
+  --font-display: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
+  --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", ui-monospace, monospace;
 }
 
 html.dark {
@@ -161,11 +161,11 @@ html.dark .xuan-paper-grain {
   opacity: 0.25;
 }
 
-/* Scroll Glass Surface */
+/* Scroll Glass Surface (lightweight blur for 120fps) */
 .wuji-glass {
   background: var(--bg-glass);
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Ink Wash Gradient Text */
@@ -192,10 +192,9 @@ html.dark .wuji-gradient-text {
   border: 1px solid var(--border-hairline);
   border-radius: 1rem;
   box-shadow: var(--shadow-card);
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease,
-    box-shadow 0.35s ease;
-  transform-style: preserve-3d;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.28s ease;
 }
 
 .wuji-card::after {
@@ -231,21 +230,18 @@ html.dark .wuji-card-interactive:hover {
   box-shadow: 0 24px 56px -22px rgba(0, 0, 0, 0.9);
 }
 
-/* Scroll-triggered Ink Unfold Reveal */
+/* Scroll-triggered Ink Unfold Reveal (GPU-composited only: opacity + transform) */
 .ink-reveal {
   opacity: 0;
-  transform: translateY(22px) scale(0.985);
-  filter: blur(4px);
+  transform: translateY(14px);
   transition:
-    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ink-reveal.is-visible {
   opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: blur(0);
+  transform: translateY(0);
 }
 
 /* Magnetic Button */

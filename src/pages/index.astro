@@ -99,18 +99,26 @@ const gridPosts = posts.filter((p) => p.id !== leadPost?.id).slice(0, 4);
         </div>
       </div>
 
-      <!-- Quiet Bottom Colophon Rule + Minimal Interactive Ink Actions -->
+      <!-- Quiet Bottom Colophon Rule + Live Astronomical Status & Minimal Ink Actions -->
       <div class="mt-20 pt-5 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono">
-          <span>藏文 {stats.postCount} 篇</span>
-          <span>·</span>
-          <span>笔耕 {(stats.totalWords / 1000).toFixed(1)} 千字</span>
-          <span>·</span>
-          <span>{stats.categoryCount} 卷目 / {stats.tagCount} 标签</span>
+        <div class="flex flex-wrap items-center gap-x-3.5 gap-y-1">
+          <span id="wuji-sky-label" class="font-editorial text-[var(--text-secondary)]">
+            四时天轨演算中…
+          </span>
+          <span class="opacity-40">·</span>
+          <span class="font-mono">藏文 {stats.postCount} 篇 / {(stats.totalWords / 1000).toFixed(1)} 千字</span>
         </div>
 
         <div class="flex items-center gap-5">
-          <span class="hidden sm:inline text-[11px] opacity-70">画卷雅玩：</span>
+          <button
+            id="hero-btn-sky"
+            type="button"
+            class="text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
+            title="切换预览春晨、夏夜、秋暮、冬望与实时天时"
+          >
+            观四时
+          </button>
+          <span class="h-3 w-[1px] bg-[var(--border-hairline)]" aria-hidden="true"></span>
           <button
             id="hero-btn-splash"
             type="button"
@@ -319,5 +327,22 @@ const gridPosts = posts.filter((p) => p.id !== leadPost?.id).slice(0, 4);
 
   document.getElementById('hero-btn-clear')?.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('wuji-hero-clear'));
+  });
+
+  // Live Astronomical & Seasonal status sync + "观四时" cycle control
+  const skyLabelEl = document.getElementById('wuji-sky-label');
+  const skyCycleBtn = document.getElementById('hero-btn-sky');
+
+  window.addEventListener('wuji-sky-update', ((e: CustomEvent) => {
+    const label = e.detail?.label;
+    const presetName = e.detail?.presetName;
+    if (skyLabelEl && label) skyLabelEl.textContent = label;
+    if (skyCycleBtn && presetName) {
+      skyCycleBtn.textContent = presetName === '实时' ? '观四时' : `观四时（${presetName}）`;
+    }
+  }) as EventListener);
+
+  skyCycleBtn?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('wuji-cycle-sky'));
   });
 </script>

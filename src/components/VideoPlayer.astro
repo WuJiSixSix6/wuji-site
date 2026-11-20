@@ -1,0 +1,98 @@
+---
+/**
+ * Reusable VideoPlayer component for MDX posts.
+ * Supports: bilibili (bvid), youtube (id), or html5 direct video (src).
+ */
+interface Props {
+  platform?: 'bilibili' | 'youtube' | 'html5';
+  bvid?: string;
+  youtubeId?: string;
+  src?: string;
+  page?: number;
+  title?: string;
+  poster?: string;
+}
+
+const {
+  platform = 'bilibili',
+  bvid = '',
+  youtubeId = '',
+  src = '',
+  page = 1,
+  title = '视频演示',
+  poster = '',
+} = Astro.props;
+
+const biliSrc = `https://player.bilibili.com/player.html?bvid=${encodeURIComponent(bvid)}&page=${page}&high_quality=1&danmaku=0&autoplay=0`;
+const biliOrigin = `https://www.bilibili.com/video/${encodeURIComponent(bvid)}/?p=${page}`;
+const ytSrc = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}`;
+const ytOrigin = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
+---
+
+<figure class="wuji-video-card" data-platform={platform}>
+  <div class="wuji-video-bar">
+    <div class="wuji-video-meta">
+      {platform === 'bilibili' && <span class="wuji-video-badge wuji-video-badge-bili">BILIBILI</span>}
+      {platform === 'youtube' && <span class="wuji-video-badge wuji-video-badge-yt">YOUTUBE</span>}
+      {platform === 'html5' && <span class="wuji-video-badge wuji-video-badge-native">VIDEO</span>}
+      <span class="wuji-video-title">{title}</span>
+    </div>
+    {
+      platform === 'bilibili' && (
+        <a class="wuji-video-link" href={biliOrigin} target="_blank" rel="noopener noreferrer">
+          在 B 站打开 ↗
+        </a>
+      )
+    }
+    {
+      platform === 'youtube' && (
+        <a class="wuji-video-link" href={ytOrigin} target="_blank" rel="noopener noreferrer">
+          在 YouTube 打开 ↗
+        </a>
+      )
+    }
+    {
+      platform === 'html5' && (
+        <a class="wuji-video-link" href={src} target="_blank" rel="noopener noreferrer">
+          新窗口打开 ↗
+        </a>
+      )
+    }
+  </div>
+  <div class="wuji-video-frame">
+    {
+      platform === 'bilibili' && (
+        <iframe
+          src={biliSrc}
+          title={title}
+          scrolling="no"
+          frameborder="0"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation"
+        />
+      )
+    }
+    {
+      platform === 'youtube' && (
+        <iframe
+          src={ytSrc}
+          title={title}
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+        />
+      )
+    }
+    {
+      platform === 'html5' && (
+        <video controls preload="metadata" playsinline poster={poster || undefined}>
+          <source src={src} />
+          您的浏览器暂不支持 HTML5 视频播放。
+        </video>
+      )
+    }
+  </div>
+</figure>

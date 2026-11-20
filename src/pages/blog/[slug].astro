@@ -1,0 +1,273 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import PostCard from '../../components/PostCard.astro';
+import WuJiLogo from '../../components/WuJiLogo.astro';
+import { SITE } from '../../data/site';
+import {
+  getChronologicalPosts,
+  computePostMeta,
+  formatDateCN,
+  getRelatedPosts,
+} from '../../utils/blog';
+
+export async function getStaticPaths() {
+  const posts = await getChronologicalPosts();
+  return posts.map((post, idx) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      prevPost: posts[idx + 1] || null,
+      nextPost: posts[idx - 1] || null,
+      allPosts: posts,
+    },
+  }));
+}
+
+const { post, prevPost, nextPost, allPosts } = Astro.props;
+const { Content, headings } = await render(post);
+const { wordCount, readingMinutes } = computePostMeta(post.body);
+const relatedPosts = getRelatedPosts(post, allPosts, 3);
+const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
+---
+
+<BaseLayout title={post.data.title} description={post.data.summary} ogType="article">
+  <ReadingProgress />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-20">
+    <!-- Breadcrumb -->
+    <nav aria-label="面包屑导航" class="flex flex-wrap items-center gap-2 text-xs font-mono text-[var(--text-muted)] mb-6">
+      <a href="/" class="hover:text-[var(--accent-gold)] transition-colors">首页</a>
+      <span>/</span>
+      <a href="/blog" class="hover:text-[var(--accent-gold)] transition-colors">文章</a>
+      <span>/</span>
+      <a
+        href={`/categories/${encodeURIComponent(post.data.category)}`}
+        class="text-[var(--accent-gold)] hover:underline"
+      >
+        {post.data.category}
+      </a>
+    </nav>
+
+    <!-- Editorial Hero Header -->
+    <header
+      class:list={[
+        'relative rounded-3xl overflow-hidden border border-[var(--border-hairline)] p-7 sm:p-10 lg:p-12 shadow-[var(--shadow-card)]',
+        coverClass,
+      ]}
+    >
+      <div class="absolute right-8 bottom-6 opacity-15 pointer-events-none hidden sm:block">
+        <WuJiLogo size={120} />
+      </div>
+
+      <div class="relative z-10 max-w-3xl">
+        <div class="flex flex-wrap items-center gap-2.5 mb-5">
+          <a
+            href={`/categories/${encodeURIComponent(post.data.category)}`}
+            class="px-3 py-1 rounded-full text-xs font-medium bg-[#e5b567]/20 text-[#f5d896] border border-[#e5b567]/40 hover:bg-[#e5b567]/30 transition-colors"
+          >
+            {post.data.category}
+          </a>
+          {post.data.pinned && (
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-mono bg-white/10 text-white/90 border border-white/15">
+              ✦ 置顶文章
+            </span>
+          )}
+        </div>
+
+        <h1
+          class="text-2xl sm:text-4xl lg:text-[2.65rem] font-bold text-white leading-[1.22] tracking-tight"
+          style="font-family: var(--font-serif);"
+        >
+          {post.data.title}
+        </h1>
+
+        {post.data.subtitle && (
+          <p class="mt-3 text-base sm:text-lg text-white/75 leading-relaxed">
+            {post.data.subtitle}
+          </p>
+        )}
+
+        <!-- Metadata row -->
+        <div class="mt-7 pt-5 border-t border-white/15 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-mono text-white/75">
+          <span class="inline-flex items-center gap-1.5">
+            <span class="text-[#f5d896]">✎</span>
+            {SITE.author}
+          </span>
+          <span>发布于 {formatDateCN(post.data.pubDate)}</span>
+          {post.data.updatedDate && (
+            <span>更新于 {formatDateCN(post.data.updatedDate)}</span>
+          )}
+          <span>约 {wordCount.toLocaleString()} 字</span>
+          <span>预计阅读 {readingMinutes} 分钟</span>
+        </div>
+
+        <!-- Tags -->
+        {post.data.tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            {post.data.tags.map((tag) => (
+              <a
+                href={`/tags/${encodeURIComponent(tag)}`}
+                class="text-[11px] font-mono px-2.5 py-0.5 rounded-lg bg-black/35 text-[#8aece0] border border-white/12 hover:border-[#38d9c0]/60 transition-colors"
+              >
+                #{tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Main 2-column reading layout -->
+    <div class="mt-10 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_270px] gap-10 items-start">
+      <!-- Left: Summary + Prose Content -->
+      <div class="min-w-0">
+        <!-- Mobile / Tablet TOC -->
+        <div class="xl:hidden">
+          <TableOfContents headings={headings} />
+        </div>
+
+        <!-- Executive Summary Box (摘要模块) -->
+        <section
+          aria-label="文章摘要"
+          class="mb-10 p-5 sm:p-6 rounded-2xl border border-[var(--accent-gold)]/25 bg-[var(--accent-gold-soft)]"
+        >
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <span class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--accent-gold)] font-semibold">
+              ✦ 文章摘要 · Abstract
+            </span>
+            <button
+              id="copy-article-link-btn"
+              type="button"
+              class="text-[11px] font-mono px-2.5 py-1 rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            >
+              复制链接
+            </button>
+          </div>
+          <p class="text-sm sm:text-[15px] text-[var(--text-primary)] leading-relaxed">
+            {post.data.summary}
+          </p>
+        </section>
+
+        <!-- Rendered Markdown / MDX Prose -->
+        <div class="wuji-prose">
+          <Content />
+        </div>
+
+        <!-- Author Signature & End Card -->
+        <div class="mt-14 p-6 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div class="flex items-center gap-4">
+            <div class="w-13 h-13 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] flex items-center justify-center shrink-0">
+              <WuJiLogo size={38} />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[var(--text-primary)]" style="font-family: var(--font-serif);">
+                  {SITE.name}
+                </span>
+                <span class="text-xs font-mono text-[var(--accent-gold)]">{SITE.enName}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+                {SITE.tagline} 感谢阅读，欢迎在 GitHub 交流或订阅 RSS。
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2.5 shrink-0">
+            <a
+              href={SITE.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl text-xs font-medium border border-[var(--border-hairline)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:border-[var(--accent-gold)]/50 transition-colors"
+            >
+              GitHub ↗
+            </a>
+            <a
+              href="/rss.xml"
+              class="px-3.5 py-2 rounded-xl text-xs font-medium bg-[var(--accent-gold-soft)] text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 hover:bg-[var(--accent-gold)]/20 transition-colors"
+            >
+              RSS 订阅
+            </a>
+          </div>
+        </div>
+
+        <!-- Prev / Next Navigation -->
+        <nav aria-label="上下篇导航" class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {prevPost ? (
+            <a
+              href={`/blog/${prevPost.id}`}
+              class="wuji-card wuji-card-interactive p-5 flex flex-col justify-between"
+            >
+              <span class="text-[11px] font-mono text-[var(--text-muted)]">← 上一篇</span>
+              <span class="mt-2 text-sm sm:text-base font-semibold text-[var(--text-primary)] line-clamp-2">
+                {prevPost.data.title}
+              </span>
+            </a>
+          ) : (
+            <div />
+          )}
+
+          {nextPost && (
+            <a
+              href={`/blog/${nextPost.id}`}
+              class="wuji-card wuji-card-interactive p-5 flex flex-col justify-between text-right"
+            >
+              <span class="text-[11px] font-mono text-[var(--text-muted)]">下一篇 →</span>
+              <span class="mt-2 text-sm sm:text-base font-semibold text-[var(--text-primary)] line-clamp-2">
+                {nextPost.data.title}
+              </span>
+            </a>
+          )}
+        </nav>
+      </div>
+
+      <!-- Right: Sticky Desktop TOC -->
+      <div class="hidden xl:block">
+        <TableOfContents headings={headings} />
+      </div>
+    </div>
+
+    <!-- Related Articles -->
+    {
+      relatedPosts.length > 0 && (
+        <section class="mt-20 pt-12 border-t border-[var(--border-hairline)]">
+          <div class="flex items-end justify-between mb-7">
+            <div>
+              <p class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--accent-jade)]">
+                Related · 延伸阅读
+              </p>
+              <h2
+                class="mt-1 text-2xl font-bold text-[var(--text-primary)]"
+                style="font-family: var(--font-serif);"
+              >
+                相关推荐文章
+              </h2>
+            </div>
+            <a href="/blog" class="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-gold)]">
+              全部文章 →
+            </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {relatedPosts.map((rp) => <PostCard post={rp} compact />)}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<script>
+  const shareBtn = document.getElementById('copy-article-link-btn');
+  shareBtn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      shareBtn.textContent = '链接已复制 ✓';
+      setTimeout(() => {
+        shareBtn.textContent = '复制链接';
+      }, 1800);
+    } catch {
+      // ignore
+    }
+  });
+</script>

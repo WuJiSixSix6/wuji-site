@@ -1,0 +1,164 @@
+---
+/**
+ * Interactive WuJi Celestial Orbital Canvas
+ * Subtle, high-DPI, 60fps geometric orbital arcs + gently drifting starlight particles
+ * that respond organically to pointer movement and theme changes.
+ */
+---
+
+<canvas
+  id="wuji-hero-canvas"
+  class="absolute inset-0 w-full h-full pointer-events-none opacity-85"
+  aria-hidden="true"
+></canvas>
+
+<script>
+  const canvas = document.getElementById('wuji-hero-canvas') as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      let width = 0;
+      let height = 0;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let mouse = { x: 0.5, y: 0.4, tx: 0.5, ty: 0.4 };
+      let rafId = 0;
+
+      interface Particle {
+        angle: number;
+        radiusFactor: number;
+        speed: number;
+        size: number;
+        alpha: number;
+        hue: 'gold' | 'jade' | 'white';
+        ecc: number;
+      }
+
+      const particles: Particle[] = Array.from({ length: 68 }, (_, i) => ({
+        angle: (i / 68) * Math.PI * 2 + Math.random() * 0.4,
+        radiusFactor: 0.14 + Math.random() * 0.42,
+        speed: (0.00045 + Math.random() * 0.00095) * (i % 2 === 0 ? 1 : -1),
+        size: 1 + Math.random() * 2.1,
+        alpha: 0.25 + Math.random() * 0.55,
+        hue: i % 5 === 0 ? 'jade' : i % 3 === 0 ? 'gold' : 'white',
+        ecc: 0.52 + Math.random() * 0.22,
+      }));
+
+      function resize() {
+        if (!canvas) return;
+        const rect = canvas.parentElement?.getBoundingClientRect();
+        width = rect ? rect.width : window.innerWidth;
+        height = rect ? rect.height : 620;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function onMove(e: MouseEvent) {
+        mouse.tx = e.clientX / Math.max(window.innerWidth, 1);
+        mouse.ty = e.clientY / Math.max(window.innerHeight, 1);
+      }
+
+      let t = 0;
+      function draw() {
+        t += 0.005;
+        mouse.x += (mouse.tx - mouse.x) * 0.04;
+        mouse.y += (mouse.ty - mouse.y) * 0.04;
+
+        const isLight = document.documentElement.classList.contains('light');
+        ctx!.clearRect(0, 0, width, height);
+
+        const cx = width * (0.5 + (mouse.x - 0.5) * 0.08);
+        const cy = height * (0.46 + (mouse.y - 0.5) * 0.08);
+        const baseR = Math.min(width, height) * 0.72;
+
+        // Ambient dual glow (Gold + Jade)
+        const goldGrad = ctx!.createRadialGradient(
+          cx - baseR * 0.18,
+          cy - baseR * 0.12,
+          0,
+          cx - baseR * 0.18,
+          cy - baseR * 0.12,
+          baseR * 0.65
+        );
+        goldGrad.addColorStop(0, isLight ? 'rgba(180, 122, 31, 0.14)' : 'rgba(229, 181, 103, 0.16)');
+        goldGrad.addColorStop(1, 'rgba(229, 181, 103, 0)');
+        ctx!.fillStyle = goldGrad;
+        ctx!.fillRect(0, 0, width, height);
+
+        const jadeGrad = ctx!.createRadialGradient(
+          cx + baseR * 0.24,
+          cy + baseR * 0.14,
+          0,
+          cx + baseR * 0.24,
+          cy + baseR * 0.14,
+          baseR * 0.58
+        );
+        jadeGrad.addColorStop(0, isLight ? 'rgba(13, 138, 120, 0.11)' : 'rgba(56, 217, 192, 0.13)');
+        jadeGrad.addColorStop(1, 'rgba(56, 217, 192, 0)');
+        ctx!.fillStyle = jadeGrad;
+        ctx!.fillRect(0, 0, width, height);
+
+        // Architectural orbital rings
+        const ringFactors = [0.22, 0.34, 0.48];
+        ringFactors.forEach((rf, idx) => {
+          ctx!.save();
+          ctx!.translate(cx, cy);
+          ctx!.rotate(t * (idx % 2 === 0 ? 0.18 : -0.14) + idx * 0.7);
+          ctx!.beginPath();
+          ctx!.ellipse(0, 0, baseR * rf, baseR * rf * 0.56, 0, 0, Math.PI * 2);
+          ctx!.strokeStyle = isLight
+            ? idx === 1
+              ? 'rgba(180, 122, 31, 0.18)'
+              : 'rgba(20, 23, 31, 0.08)'
+            : idx === 1
+              ? 'rgba(229, 181, 103, 0.2)'
+              : 'rgba(255, 255, 255, 0.07)';
+          ctx!.lineWidth = idx === 1 ? 1.2 : 0.9;
+          ctx!.setLineDash(idx === 2 ? [4, 10] : []);
+          ctx!.stroke();
+          ctx!.restore();
+        });
+
+        // Orbiting stardust particles
+        for (const p of particles) {
+          p.angle += p.speed;
+          const rx = baseR * p.radiusFactor;
+          const ry = rx * p.ecc;
+          const px = cx + Math.cos(p.angle) * rx;
+          const py = cy + Math.sin(p.angle) * ry;
+
+          ctx!.beginPath();
+          ctx!.arc(px, py, p.size, 0, Math.PI * 2);
+          if (p.hue === 'gold') {
+            ctx!.fillStyle = isLight
+              ? `rgba(180, 122, 31, ${p.alpha * 0.75})`
+              : `rgba(229, 181, 103, ${p.alpha})`;
+          } else if (p.hue === 'jade') {
+            ctx!.fillStyle = isLight
+              ? `rgba(13, 138, 120, ${p.alpha * 0.75})`
+              : `rgba(56, 217, 192, ${p.alpha})`;
+          } else {
+            ctx!.fillStyle = isLight
+              ? `rgba(20, 23, 31, ${p.alpha * 0.35})`
+              : `rgba(242, 244, 248, ${p.alpha * 0.6})`;
+          }
+          ctx!.fill();
+        }
+
+        rafId = requestAnimationFrame(draw);
+      }
+
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+      window.addEventListener('mousemove', onMove, { passive: true });
+      draw();
+
+      document.addEventListener('astro:before-swap', () => {
+        cancelAnimationFrame(rafId);
+        window.removeEventListener('resize', resize);
+        window.removeEventListener('mousemove', onMove);
+      });
+    }
+  }
+</script>

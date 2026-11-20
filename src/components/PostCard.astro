@@ -1,0 +1,118 @@
+---
+import type { BlogPost } from '../utils/blog';
+import { computePostMeta, formatDate } from '../utils/blog';
+
+interface Props {
+  post: BlogPost;
+  compact?: boolean;
+}
+
+const { post, compact = false } = Astro.props;
+const { wordCount, readingMinutes } = computePostMeta(post.body);
+const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
+---
+
+<article
+  class="wuji-card wuji-card-interactive group flex flex-col overflow-hidden h-full"
+  data-category={post.data.category}
+  data-tags={post.data.tags.join(',')}
+  data-title={post.data.title.toLowerCase()}
+  data-summary={post.data.summary.toLowerCase()}
+  data-date={post.data.pubDate.valueOf()}
+  data-reading={readingMinutes}
+>
+  {
+    !compact && (
+      <a
+        href={`/blog/${post.id}`}
+        class:list={[
+          'relative block h-40 overflow-hidden border-b border-[var(--border-hairline)]',
+          coverClass,
+        ]}
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <!-- Decorative orbital geometry -->
+        <svg
+          class="absolute right-4 bottom-3 w-28 h-28 opacity-20 group-hover:opacity-35 group-hover:scale-105 transition-all duration-500"
+          viewBox="0 0 120 120"
+          fill="none"
+        >
+          <circle cx="60" cy="60" r="46" stroke="#f4d48e" stroke-width="0.8" stroke-dasharray="6 6" />
+          <circle cx="60" cy="60" r="28" stroke="#38d9c0" stroke-width="0.9" />
+          <circle cx="60" cy="32" r="3" fill="#f4d48e" />
+          <circle cx="60" cy="88" r="3" fill="#38d9c0" />
+        </svg>
+
+        <div class="relative z-10 h-full p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/45 backdrop-blur-md text-[#f5d896] border border-white/15">
+              {post.data.category}
+            </span>
+            {post.data.pinned && (
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-[#e5b567]/20 text-[#f5d896] border border-[#e5b567]/40">
+                ✦ 置顶
+              </span>
+            )}
+          </div>
+          <div class="flex items-center gap-3 text-[11px] font-mono text-white/75">
+            <span>{formatDate(post.data.pubDate)}</span>
+            <span>·</span>
+            <span>{readingMinutes} 分钟</span>
+            <span>·</span>
+            <span>{wordCount.toLocaleString()} 字</span>
+          </div>
+        </div>
+      </a>
+    )
+  }
+
+  <div class="flex flex-col flex-1 p-5 sm:p-6">
+    {
+      compact && (
+        <div class="flex items-center justify-between gap-2 mb-3 text-xs font-mono text-[var(--text-muted)]">
+          <span class="px-2.5 py-0.5 rounded-full bg-[var(--accent-gold-soft)] text-[var(--accent-gold)] font-sans font-medium">
+            {post.data.category}
+          </span>
+          <span>{formatDate(post.data.pubDate)}</span>
+        </div>
+      )
+    }
+
+    <h3
+      class="text-lg sm:text-xl font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+      style="font-family: var(--font-serif);"
+    >
+      <a href={`/blog/${post.id}`} class="focus:outline-none">
+        {post.data.title}
+      </a>
+    </h3>
+
+    <p class="mt-2.5 text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3 flex-1">
+      {post.data.summary}
+    </p>
+
+    <!-- Tags & CTA -->
+    <div class="mt-5 pt-4 border-t border-[var(--border-hairline)] flex items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+        {
+          post.data.tags.slice(0, 3).map((tag) => (
+            <a
+              href={`/tags/${encodeURIComponent(tag)}`}
+              class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--accent-jade)] border border-[var(--border-hairline)] transition-colors"
+            >
+              #{tag}
+            </a>
+          ))
+        }
+      </div>
+      <a
+        href={`/blog/${post.id}`}
+        class="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-gold)] group-hover:translate-x-0.5 transition-transform"
+      >
+        阅读全文
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</article>

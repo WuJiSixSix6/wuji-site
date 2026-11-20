@@ -1,0 +1,245 @@
+---
+/**
+ * Global Command Palette Search (⌘K / Ctrl+K)
+ * Fetches static /search-index.json on first open for instant client-side full-text search.
+ */
+---
+
+<div
+  id="wuji-search-modal"
+  class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh] px-4 bg-black/70 backdrop-blur-md"
+  role="dialog"
+  aria-modal="true"
+  aria-label="全站搜索"
+>
+  <div
+    id="wuji-search-dialog"
+    class="w-full max-w-2xl rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-[0_30px_90px_-15px_rgba(0,0,0,0.85)] overflow-hidden"
+  >
+    <!-- Input Header -->
+    <div class="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border-hairline)]">
+      <svg class="w-4.5 h-4.5 text-[var(--accent-gold)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input
+        id="wuji-search-input"
+        type="text"
+        placeholder="搜索文章标题、摘要、标签、分类或正文内容..."
+        autocomplete="off"
+        class="w-full bg-transparent text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+      />
+      <button
+        id="wuji-search-close"
+        type="button"
+        class="px-2 py-1 text-[11px] font-mono rounded-lg border border-[var(--border-hairline)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+      >
+        ESC
+      </button>
+    </div>
+
+    <!-- Results Container -->
+    <div id="wuji-search-results" class="max-h-[55vh] overflow-y-auto p-2.5 space-y-1">
+      <div class="py-10 text-center text-sm text-[var(--text-muted)]">
+        输入关键词开始检索无极数字花园…
+      </div>
+    </div>
+
+    <!-- Footer hints -->
+    <div class="flex items-center justify-between px-4 py-2.5 border-t border-[var(--border-hairline)] bg-[var(--bg-elevated)]/60 text-[11px] text-[var(--text-muted)] font-mono">
+      <div class="flex items-center gap-3">
+        <span>↑↓ 切换</span>
+        <span>↵ 打开</span>
+        <span>ESC 关闭</span>
+      </div>
+      <span id="wuji-search-count">WUJI INDEX</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface SearchItem {
+    slug: string;
+    title: string;
+    summary: string;
+    category: string;
+    tags: string[];
+    date: string;
+    readingMinutes: number;
+    content: string;
+  }
+
+  const modal = document.getElementById('wuji-search-modal');
+  const dialog = document.getElementById('wuji-search-dialog');
+  const input = document.getElementById('wuji-search-input') as HTMLInputElement | null;
+  const resultsEl = document.getElementById('wuji-search-results');
+  const countEl = document.getElementById('wuji-search-count');
+  const openBtn = document.getElementById('open-search-btn');
+  const closeBtn = document.getElementById('wuji-search-close');
+
+  let indexData: SearchItem[] | null = null;
+  let activeIdx = 0;
+  let currentMatches: SearchItem[] = [];
+
+  async function ensureIndex() {
+    if (indexData) return indexData;
+    try {
+      const res = await fetch('/search-index.json');
+      indexData = await res.json();
+      return indexData || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function escapeHtml(str: string) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function highlight(text: string, query: string) {
+    const safe = escapeHtml(text);
+    if (!query) return safe;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safe.replace(
+      new RegExp(`(${escaped})`, 'gi'),
+      '<mark class="bg-[var(--accent-gold)]/25 text-[var(--accent-gold)] rounded px-0.5">$1</mark>'
+    );
+  }
+
+  function renderResults(query: string) {
+    if (!resultsEl || !countEl) return;
+    const items = indexData || [];
+    const q = query.trim().toLowerCase();
+
+    currentMatches = q
+      ? items.filter((item) => {
+          return (
+            item.title.toLowerCase().includes(q) ||
+            item.summary.toLowerCase().includes(q) ||
+            item.category.toLowerCase().includes(q) ||
+            item.tags.some((t) => t.toLowerCase().includes(q)) ||
+            item.content.toLowerCase().includes(q)
+          );
+        })
+      : items.slice(0, 6);
+
+    activeIdx = 0;
+    countEl.textContent = q ? `找到 ${currentMatches.length} 篇` : `共 ${items.length} 篇文章`;
+
+    if (currentMatches.length === 0) {
+      resultsEl.innerHTML = `
+        <div class="py-12 text-center space-y-1.5">
+          <p class="text-sm text-[var(--text-secondary)]">未找到与 “${escapeHtml(query)}” 相关的文章</p>
+          <p class="text-xs text-[var(--text-muted)]">试试搜索：Markdown、Transformer、KaTeX、Nginx、哲学</p>
+        </div>
+      `;
+      return;
+    }
+
+    resultsEl.innerHTML = currentMatches
+      .map((item, idx) => {
+        const isSelected = idx === activeIdx;
+        return `
+          <a
+            href="/blog/${item.slug}"
+            data-search-idx="${idx}"
+            class="wuji-search-item block p-3.5 rounded-xl border transition-all ${
+              isSelected
+                ? 'bg-[var(--accent-gold-soft)] border-[var(--accent-gold)]/40'
+                : 'border-transparent hover:bg-white/[0.04]'
+            }"
+          >
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-sm font-semibold text-[var(--text-primary)] line-clamp-1">
+                ${highlight(item.title, query.trim())}
+              </span>
+              <span class="shrink-0 text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--accent-gold)] border border-[var(--border-hairline)]">
+                ${escapeHtml(item.category)}
+              </span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+              ${highlight(item.summary, query.trim())}
+            </p>
+            <div class="mt-2 flex items-center gap-3 text-[11px] font-mono text-[var(--text-muted)]">
+              <span>${item.date}</span>
+              <span>·</span>
+              <span>${item.readingMinutes} 分钟阅读</span>
+              ${item.tags.slice(0, 3).map((t) => `<span class="text-[var(--accent-jade)]">#${escapeHtml(t)}</span>`).join('')}
+            </div>
+          </a>
+        `;
+      })
+      .join('');
+  }
+
+  function updateActiveHighlight() {
+    const nodes = resultsEl?.querySelectorAll('.wuji-search-item');
+    nodes?.forEach((node, idx) => {
+      if (idx === activeIdx) {
+        node.classList.add('bg-[var(--accent-gold-soft)]', 'border-[var(--accent-gold)]/40');
+        node.classList.remove('border-transparent');
+        node.scrollIntoView({ block: 'nearest' });
+      } else {
+        node.classList.remove('bg-[var(--accent-gold-soft)]', 'border-[var(--accent-gold)]/40');
+        node.classList.add('border-transparent');
+      }
+    });
+  }
+
+  async function openSearch() {
+    if (!modal || !input) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    await ensureIndex();
+    renderResults(input.value);
+    requestAnimationFrame(() => input.focus());
+  }
+
+  function closeSearch() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  openBtn?.addEventListener('click', openSearch);
+  closeBtn?.addEventListener('click', closeSearch);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeSearch();
+  });
+
+  input?.addEventListener('input', () => {
+    renderResults(input.value);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (modal?.classList.contains('hidden')) openSearch();
+      else closeSearch();
+      return;
+    }
+
+    if (modal?.classList.contains('hidden')) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSearch();
+    } else if (e.key === 'ArrowDown' && currentMatches.length > 0) {
+      e.preventDefault();
+      activeIdx = (activeIdx + 1) % currentMatches.length;
+      updateActiveHighlight();
+    } else if (e.key === 'ArrowUp' && currentMatches.length > 0) {
+      e.preventDefault();
+      activeIdx = (activeIdx - 1 + currentMatches.length) % currentMatches.length;
+      updateActiveHighlight();
+    } else if (e.key === 'Enter' && currentMatches[activeIdx]) {
+      e.preventDefault();
+      window.location.href = `/blog/${currentMatches[activeIdx].slug}`;
+    }
+  });
+</script>

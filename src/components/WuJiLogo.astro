@@ -1,0 +1,51 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 34, class: className = '' } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  class={className}
+  aria-hidden="true"
+>
+  <defs>
+    <linearGradient id="wuji-logo-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f4d48e" />
+      <stop offset="55%" stop-color="#d8a24a" />
+      <stop offset="100%" stop-color="#38d9c0" />
+    </linearGradient>
+  </defs>
+  <circle
+    cx="32"
+    cy="32"
+    r="27"
+    stroke="url(#wuji-logo-grad)"
+    stroke-opacity="0.35"
+    stroke-width="1.2"
+  />
+  <circle
+    cx="32"
+    cy="32"
+    r="22"
+    stroke="url(#wuji-logo-grad)"
+    stroke-width="1.6"
+    stroke-dasharray="98 20"
+    stroke-linecap="round"
+  />
+  <path
+    d="M32 13C42.493 13 51 21.507 51 32C51 42.493 42.493 51 32 51C26.753 51 22.5 46.747 22.5 41.5C22.5 36.253 26.753 32 32 32C37.247 32 41.5 27.747 41.5 22.5C41.5 17.253 37.247 13 32 13Z"
+    fill="url(#wuji-logo-grad)"
+    fill-opacity="0.16"
+    stroke="url(#wuji-logo-grad)"
+    stroke-width="1.5"
+  />
+  <circle cx="32" cy="22.5" r="2.7" fill="#f4d48e" />
+  <circle cx="32" cy="41.5" r="2.7" fill="#38d9c0" />
+</svg>

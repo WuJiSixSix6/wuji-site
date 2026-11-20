@@ -1,0 +1,329 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroCanvas from '../components/HeroCanvas.astro';
+import PostCard from '../components/PostCard.astro';
+import WuJiLogo from '../components/WuJiLogo.astro';
+import { SITE, getCategoryMeta } from '../data/site';
+import {
+  getPublishedPosts,
+  getCategoriesMap,
+  getTotalStats,
+  computePostMeta,
+  formatDate,
+} from '../utils/blog';
+
+const posts = await getPublishedPosts();
+const stats = getTotalStats(posts);
+const categories = getCategoriesMap(posts);
+
+const featuredPosts = posts.filter((p) => p.data.featured || p.data.pinned).slice(0, 3);
+const primaryFeatured = featuredPosts[0] || posts[0];
+const secondaryFeatured = featuredPosts.slice(1, 3);
+const latestPosts = posts.slice(0, 6);
+---
+
+<BaseLayout title={SITE.title} description={SITE.heroSubtitle}>
+  <!-- =========================================================
+       CINEMATIC HERO SECTION
+       ========================================================= -->
+  <section class="relative -mt-24 pt-36 pb-20 sm:pt-44 sm:pb-28 overflow-hidden">
+    <div class="absolute inset-0 wuji-grid-bg pointer-events-none"></div>
+    <HeroCanvas />
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="max-w-3xl">
+        <!-- Status pill -->
+        <div
+          class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)]/75 backdrop-blur-md text-xs text-[var(--text-secondary)] mb-7"
+        >
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-jade)] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-jade)]"></span>
+          </span>
+          <span class="font-mono tracking-wider uppercase text-[11px] text-[var(--accent-gold)]">
+            WUJI DIGITAL GARDEN
+          </span>
+          <span class="opacity-40">·</span>
+          <span>持续沉淀与演进</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="space-y-2">
+          <span
+            class="block text-5xl sm:text-7xl font-bold tracking-tight text-[var(--text-primary)] leading-[1.08]"
+            style="font-family: var(--font-serif);"
+          >
+            无极
+            <span class="wuji-gradient-text font-extrabold tracking-wide ml-2" style="font-family: var(--font-display);">
+              WuJi
+            </span>
+          </span>
+          <span
+            class="block text-xl sm:text-2xl font-normal text-[var(--text-secondary)] pt-2 tracking-wide"
+            style="font-family: var(--font-serif);"
+          >
+            {SITE.tagline}
+          </span>
+        </h1>
+
+        <p class="mt-6 text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+          {SITE.heroSubtitle}
+        </p>
+
+        <!-- Primary CTAs -->
+        <div class="mt-9 flex flex-wrap items-center gap-3.5">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm text-[#08090c] shadow-[0_10px_30px_-8px_rgba(229,181,103,0.55)] hover:-translate-y-0.5 transition-all"
+            style="background: linear-gradient(135deg, #f4d48e 0%, #e5b567 60%, #d49c42 100%);"
+          >
+            <span>探索全部文章</span>
+            <span aria-hidden="true">→</span>
+          </a>
+
+          <a
+            href="/archive"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-strong)] bg-[var(--bg-surface)]/75 backdrop-blur-md text-[var(--text-primary)] hover:border-[var(--accent-gold)]/50 hover:text-[var(--accent-gold)] transition-all"
+          >
+            <span>时间轴归档</span>
+          </a>
+
+          <a
+            href="/about"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-hairline)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all"
+          >
+            <span>关于无极</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Stats Strip -->
+      <div class="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl">
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-md">
+          <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.postCount}</div>
+          <div class="text-xs text-[var(--text-muted)] mt-0.5">收录文章 · Posts</div>
+        </div>
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-md">
+          <div class="text-2xl font-bold font-mono text-[var(--accent-gold)]">
+            {(stats.totalWords / 1000).toFixed(1)}k
+          </div>
+          <div class="text-xs text-[var(--text-muted)] mt-0.5">累计字数 · Words</div>
+        </div>
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-md">
+          <div class="text-2xl font-bold font-mono text-[var(--accent-jade)]">{stats.categoryCount}</div>
+          <div class="text-xs text-[var(--text-muted)] mt-0.5">专题分类 · Topics</div>
+        </div>
+        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-md">
+          <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.tagCount}</div>
+          <div class="text-xs text-[var(--text-muted)] mt-0.5">知识标签 · Tags</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FEATURED BENTO SHOWCASE
+       ========================================================= -->
+  {
+    primaryFeatured && (
+      <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-16">
+        <div class="flex items-end justify-between gap-4 mb-8">
+          <div>
+            <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-gold)]">
+              Curated · 精选推荐
+            </p>
+            <h2
+              class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
+              style="font-family: var(--font-serif);"
+            >
+              置顶与代表作
+            </h2>
+          </div>
+          <a
+            href="/blog"
+            class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+          >
+            查看全部 →
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Primary Spotlight Card -->
+          {(() => {
+            const meta = computePostMeta(primaryFeatured.body);
+            return (
+              <a
+                href={`/blog/${primaryFeatured.id}`}
+                class:list={[
+                  'lg:col-span-7 group relative rounded-3xl overflow-hidden border border-[var(--border-hairline)] hover:border-[var(--accent-gold)]/50 transition-all duration-300 p-7 sm:p-9 flex flex-col justify-between min-h-[340px] shadow-[var(--shadow-card)]',
+                  `cover-${primaryFeatured.data.coverTheme || 'celestial-gold'}`,
+                ]}
+              >
+                <div class="absolute right-6 top-6 opacity-20 group-hover:opacity-40 group-hover:rotate-45 transition-all duration-700">
+                  <WuJiLogo size={96} />
+                </div>
+
+                <div class="relative z-10 flex flex-wrap items-center gap-2.5">
+                  <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#e5b567]/20 text-[#f5d896] border border-[#e5b567]/40">
+                    ✦ 精选置顶
+                  </span>
+                  <span class="px-3 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-md text-white/90 border border-white/15">
+                    {primaryFeatured.data.category}
+                  </span>
+                </div>
+
+                <div class="relative z-10 mt-10">
+                  <h3
+                    class="text-2xl sm:text-3xl font-bold text-white leading-snug group-hover:text-[#f5d896] transition-colors"
+                    style="font-family: var(--font-serif);"
+                  >
+                    {primaryFeatured.data.title}
+                  </h3>
+                  <p class="mt-3 text-sm sm:text-base text-white/75 leading-relaxed line-clamp-3 max-w-xl">
+                    {primaryFeatured.data.summary}
+                  </p>
+                  <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-white/12 text-xs font-mono text-white/70">
+                    <div class="flex items-center gap-3">
+                      <span>{formatDate(primaryFeatured.data.pubDate)}</span>
+                      <span>·</span>
+                      <span>{meta.readingMinutes} 分钟阅读</span>
+                      <span>·</span>
+                      <span>{meta.wordCount.toLocaleString()} 字</span>
+                    </div>
+                    <span class="text-[#f5d896] font-sans font-medium group-hover:translate-x-1 transition-transform">
+                      立即品读 →
+                    </span>
+                  </div>
+                </div>
+              </a>
+            );
+          })()}
+
+          <!-- Secondary Stacked Cards -->
+          <div class="lg:col-span-5 flex flex-col gap-5">
+            {secondaryFeatured.map((post) => {
+              const meta = computePostMeta(post.body);
+              return (
+                <a
+                  href={`/blog/${post.id}`}
+                  class="wuji-card wuji-card-interactive group flex-1 p-6 flex flex-col justify-between"
+                >
+                  <div>
+                    <div class="flex items-center justify-between gap-2 text-xs mb-3">
+                      <span class="px-2.5 py-0.5 rounded-full bg-[var(--accent-jade-soft)] text-[var(--accent-jade)] font-medium">
+                        {post.data.category}
+                      </span>
+                      <span class="font-mono text-[var(--text-muted)]">
+                        {formatDate(post.data.pubDate)}
+                      </span>
+                    </div>
+                    <h3
+                      class="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+                      style="font-family: var(--font-serif);"
+                    >
+                      {post.data.title}
+                    </h3>
+                    <p class="mt-2 text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                      {post.data.summary}
+                    </p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-[var(--border-hairline)] flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
+                    <span>{meta.readingMinutes} 分钟 · {meta.wordCount.toLocaleString()} 字</span>
+                    <span class="text-[var(--accent-gold)] font-sans group-hover:translate-x-0.5 transition-transform">
+                      阅读 →
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- =========================================================
+       LATEST ARTICLES GRID
+       ========================================================= -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+    <div class="flex items-end justify-between gap-4 mb-8">
+      <div>
+        <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-jade)]">
+          Latest · 近期更新
+        </p>
+        <h2
+          class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
+          style="font-family: var(--font-serif);"
+        >
+          最新博客文章
+        </h2>
+      </div>
+      <a
+        href="/blog"
+        class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+      >
+        进入文章库 →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {latestPosts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <!-- =========================================================
+       CATEGORIES & CAPABILITIES MATRIX
+       ========================================================= -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+    <div class="flex items-end justify-between gap-4 mb-8">
+      <div>
+        <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-gold)]">
+          Dimensions · 知识维度
+        </p>
+        <h2
+          class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
+          style="font-family: var(--font-serif);"
+        >
+          专题分类导览
+        </h2>
+      </div>
+      <a
+        href="/categories"
+        class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+      >
+        全部分类 →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {
+        categories.map((cat) => {
+          const meta = getCategoryMeta(cat.name);
+          return (
+            <a
+              href={`/categories/${encodeURIComponent(cat.name)}`}
+              class="wuji-card wuji-card-interactive group p-5 flex items-start gap-4"
+            >
+              <div class="shrink-0 w-11 h-11 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] flex items-center justify-center text-lg text-[var(--accent-gold)] group-hover:scale-105 transition-transform">
+                {meta.glyph}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">
+                    {cat.name}
+                  </h3>
+                  <span class="text-xs font-mono px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)]">
+                    {cat.count} 篇
+                  </span>
+                </div>
+                <p class="mt-1.5 text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                  {meta.desc}
+                </p>
+              </div>
+            </a>
+          );
+        })
+      }
+    </div>
+  </section>
+</BaseLayout>

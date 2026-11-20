@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WuJiLogo from '../components/WuJiLogo.astro';
+---
+
+<BaseLayout title="404 · 页面未找到" description="抱歉，你访问的页面似乎消失在无极星海之中。">
+  <section class="max-w-2xl mx-auto px-4 sm:px-6 py-24 text-center">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-hairline)] mb-8 animate-float-slow">
+      <WuJiLogo size={50} />
+    </div>
+    <p class="text-xs font-mono uppercase tracking-[0.28em] text-[var(--accent-gold)]">
+      ERROR 404 · VOID
+    </p>
+    <h1
+      class="mt-3 text-4xl sm:text-6xl font-bold text-[var(--text-primary)]"
+      style="font-family: var(--font-serif);"
+    >
+      此境空无一物
+    </h1>
+    <p class="mt-4 text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+      你访问的地址可能已移动或从未存在。不妨回到首页，或按 <kbd class="px-1.5 py-0.5 text-xs font-mono rounded bg-[var(--bg-elevated)] border border-[var(--border-hairline)]">⌘K</kbd> 检索全站内容。
+    </p>
+    <div class="mt-8 flex items-center justify-center gap-3">
+      <a
+        href="/"
+        class="px-5 py-2.5 rounded-xl text-sm font-medium text-[#08090c]"
+        style="background: linear-gradient(135deg, #f4d48e 0%, #e5b567 100%);"
+      >
+        返回首页
+      </a>
+      <a
+        href="/blog"
+        class="px-5 py-2.5 rounded-xl text-sm font-medium border border-[var(--border-strong)] text-[var(--text-primary)] hover:border-[var(--accent-gold)]/50 transition-colors"
+      >
+        浏览文章
+      </a>
+    </div>
+  </section>
+</BaseLayout>

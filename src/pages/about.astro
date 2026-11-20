@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WuJiLogo from '../components/WuJiLogo.astro';
+import { SITE } from '../data/site';
+import { getPublishedPosts, getTotalStats } from '../utils/blog';
+
+const posts = await getPublishedPosts();
+const stats = getTotalStats(posts);
+
+const capabilities = [
+  {
+    glyph: 'MD',
+    title: 'Markdown 直转静态网页',
+    desc: '只需向 src/content/blog/ 目录添加 .md 或 .mdx 文件，自动生成语义化静态页面、SEO Meta 与 Sitemap。',
+  },
+  {
+    glyph: '∑',
+    title: 'KaTeX 数学公式渲染',
+    desc: '原生支持行内与块级 LaTeX 公式，本地打包字体与样式，海内外访问均毫秒级清晰呈现。',
+  },
+  {
+    glyph: '</>',
+    title: 'Shiki 专业代码引擎',
+    desc: '亮暗双主题语法高亮、自动行号、语言角标与一键复制，完美呈现 TypeScript / Python / Rust / Bash 等代码。',
+  },
+  {
+    glyph: '▶',
+    title: '多平台视频嵌入',
+    desc: '支持纯 Markdown 一行语法嵌入哔哩哔哩（BV 号）、YouTube 与 HTML5 直链视频，自适应 16:9 影院卡片。',
+  },
+  {
+    glyph: '⌘K',
+    title: '全站本地即时搜索',
+    desc: '构建期自动索引标题、摘要、分类、标签与正文，支持键盘快捷键毫秒级模糊检索。',
+  },
+  {
+    glyph: '∞',
+    title: 'GitHub + 云端 CI/CD',
+    desc: '代码托管于 GitHub，每次 git push 自动触发 GitHub Actions 编译并同步至云服务器 Nginx。',
+  },
+];
+
+const techStack = [
+  'Astro 7',
+  'TypeScript',
+  'Tailwind CSS v4',
+  'KaTeX',
+  'Shiki',
+  'Markdown / MDX',
+  'GitHub Actions',
+  'Nginx',
+  'Ubuntu Linux',
+];
+---
+
+<BaseLayout title="关于无极" description="认识无极 (WuJi) 与这座数字花园背后的设计理念和技术架构。">
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-20 space-y-12">
+    <!-- Hero Profile Card -->
+    <div class="relative rounded-3xl overflow-hidden border border-[var(--border-hairline)] cover-celestial-gold p-8 sm:p-12 shadow-[var(--shadow-card)]">
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-7">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-black/45 backdrop-blur-md border border-[#e5b567]/40 flex items-center justify-center shrink-0 animate-float-slow">
+          <WuJiLogo size={62} />
+        </div>
+        <div class="space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-black/40 text-[#f5d896] border border-white/15">
+            <span>AUTHOR · 站主</span>
+          </div>
+          <h1
+            class="text-3xl sm:text-5xl font-bold text-white tracking-tight"
+            style="font-family: var(--font-serif);"
+          >
+            无极 <span class="wuji-gradient-text font-extrabold ml-1" style="font-family: var(--font-display);">WuJi</span>
+          </h1>
+          <p class="text-sm sm:text-base text-white/80 max-w-2xl leading-relaxed">
+            「{SITE.tagline}」热爱计算机科学、数学之美、现代前端工程与系统架构。
+            这座数字花园用来安放值得反复推敲的技术洞察、公式推导与工程实践。
+          </p>
+        </div>
+      </div>
+
+      <div class="relative z-10 mt-8 pt-6 border-t border-white/15 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-6 text-xs font-mono text-white/75">
+          <span>文章 · {stats.postCount}</span>
+          <span>字数 · {stats.totalWords.toLocaleString()}</span>
+          <span>分类 · {stats.categoryCount}</span>
+          <span>标签 · {stats.tagCount}</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <a
+            href={SITE.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2 rounded-xl text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors"
+          >
+            GitHub · WuJiSixSix6 ↗
+          </a>
+          <a
+            href="/rss.xml"
+            class="px-4 py-2 rounded-xl text-xs font-medium bg-[#e5b567]/20 hover:bg-[#e5b567]/30 text-[#f5d896] border border-[#e5b567]/40 transition-colors"
+          >
+            订阅 RSS
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design Philosophy -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div class="md:col-span-5 wuji-card p-6 sm:p-7 flex flex-col justify-between">
+        <div>
+          <p class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+            Manifesto · 理念
+          </p>
+          <h2
+            class="mt-2 text-2xl font-bold text-[var(--text-primary)]"
+            style="font-family: var(--font-serif);"
+          >
+            为何名为「无极」？
+          </h2>
+          <p class="mt-4 text-sm text-[var(--text-secondary)] leading-relaxed">
+            无极意味着不被既有边界所困：既追求底层原理的数学严谨，也钟情于前端界面的光影质感；既能深入系统架构的复杂度，也懂得在表达上做减法。
+          </p>
+        </div>
+        <p class="mt-6 pt-4 border-t border-[var(--border-hairline)] text-xs font-mono text-[var(--text-muted)]">
+          LESS NOISE · MORE SIGNAL · INFINITE CURIOSITY
+        </p>
+      </div>
+
+      <div class="md:col-span-7 wuji-card p-6 sm:p-7">
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--accent-jade)]">
+          Tech Stack · 站点技术栈
+        </p>
+        <h2
+          class="mt-2 text-2xl font-bold text-[var(--text-primary)]"
+          style="font-family: var(--font-serif);"
+        >
+          零妥协的现代静态架构
+        </h2>
+        <p class="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed">
+          本站采用全静态预渲染架构，彻底告别臃肿的客户端框架开销与脆弱的数据库运维，每一篇博客在构建期即完成 Markdown 编译、数学排版与代码高亮。
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          {
+            techStack.map((item) => (
+              <span class="px-3 py-1.5 rounded-xl text-xs font-mono bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-hairline)]">
+                {item}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Capabilities Grid -->
+    <div>
+      <div class="mb-6">
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+          Architecture · 核心能力
+        </p>
+        <h2
+          class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
+          style="font-family: var(--font-serif);"
+        >
+          为深度写作而生的博客系统
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {
+          capabilities.map((cap) => (
+            <div class="wuji-card p-5 space-y-2.5">
+              <div class="w-10 h-10 rounded-xl bg-[var(--accent-gold-soft)] border border-[var(--accent-gold)]/30 flex items-center justify-center font-mono text-xs font-bold text-[var(--accent-gold)]">
+                {cap.glyph}
+              </div>
+              <h3 class="font-bold text-[var(--text-primary)]">{cap.title}</h3>
+              <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                {cap.desc}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

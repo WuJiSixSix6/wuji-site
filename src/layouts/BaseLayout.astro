@@ -1,0 +1,133 @@
+---
+import '../styles/global.css';
+import { SITE } from '../data/site';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import CommandSearch from '../components/CommandSearch.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title = SITE.title,
+  description = SITE.heroSubtitle,
+  ogType = 'website',
+} = Astro.props;
+
+const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`;
+---
+
+<!doctype html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.author} />
+    <meta name="generator" content={Astro.generator} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={SITE.shortTitle} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+
+    <!-- Fonts (graceful progressive enhancement with native CJK fallbacks) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{pageTitle}</title>
+
+    <!-- Prevent theme flash -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('wuji-theme');
+        if (stored === 'light') {
+          document.documentElement.classList.add('light');
+          document.documentElement.classList.remove('dark');
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="relative flex flex-col min-h-screen">
+    <Navbar />
+
+    <main class="flex-1 pt-24">
+      <slot />
+    </main>
+
+    <Footer />
+    <CommandSearch />
+
+    <!-- Image Lightbox Modal -->
+    <div
+      id="wuji-lightbox"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md cursor-zoom-out"
+      aria-hidden="true"
+    >
+      <img
+        id="wuji-lightbox-img"
+        src=""
+        alt=""
+        class="max-w-[92vw] max-h-[88vh] rounded-2xl border border-white/15 shadow-2xl object-contain"
+      />
+    </div>
+
+    <!-- Global interactivity: Code copy buttons & Image lightbox -->
+    <script>
+      // Code block copy buttons
+      document.querySelectorAll<HTMLButtonElement>('.wuji-copy-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const block = btn.closest('.wuji-code-block');
+          const codeEl = block?.querySelector('pre code');
+          if (!codeEl) return;
+
+          const lines = Array.from(codeEl.querySelectorAll('.line')).map((l) => l.textContent ?? '');
+          const text = lines.length > 0 ? lines.join('\n') : codeEl.textContent || '';
+
+          try {
+            await navigator.clipboard.writeText(text);
+            const label = btn.querySelector('.wuji-copy-label');
+            btn.classList.add('copied');
+            if (label) label.textContent = '已复制 ✓';
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              if (label) label.textContent = '复制';
+            }, 1800);
+          } catch {
+            // Fallback
+          }
+        });
+      });
+
+      // Lightbox for prose images
+      const lightbox = document.getElementById('wuji-lightbox');
+      const lightboxImg = document.getElementById('wuji-lightbox-img') as HTMLImageElement | null;
+      document.querySelectorAll<HTMLImageElement>('.wuji-prose img').forEach((img) => {
+        img.addEventListener('click', () => {
+          if (!lightbox || !lightboxImg) return;
+          lightboxImg.src = img.src;
+          lightboxImg.alt = img.alt;
+          lightbox.classList.remove('hidden');
+          lightbox.classList.add('flex');
+        });
+      });
+
+      lightbox?.addEventListener('click', () => {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+      });
+    </script>
+  </body>
+</html>

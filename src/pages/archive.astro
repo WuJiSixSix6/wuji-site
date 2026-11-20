@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  getChronologicalPosts,
+  groupPostsByYearMonth,
+  computePostMeta,
+  getTotalStats,
+} from '../utils/blog';
+
+const posts = await getChronologicalPosts();
+const archiveGroups = groupPostsByYearMonth(posts);
+const stats = getTotalStats(posts);
+---
+
+<BaseLayout title="文章归档" description="按时间轴浏览无极 (WuJi) 的全部历史文章与笔记归档。">
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-20">
+    <!-- Header -->
+    <div class="mb-12">
+      <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-gold)]">
+        Timeline · 时间轴归档
+      </p>
+      <h1
+        class="mt-2 text-3xl sm:text-5xl font-bold text-[var(--text-primary)]"
+        style="font-family: var(--font-serif);"
+      >
+        岁月留痕 · 归档
+      </h1>
+      <p class="mt-3 text-sm sm:text-base text-[var(--text-secondary)]">
+        共 <span class="font-mono text-[var(--accent-gold)]">{stats.postCount}</span> 篇文章，累计约{' '}
+        <span class="font-mono text-[var(--accent-jade)]">{stats.totalWords.toLocaleString()}</span> 字，跨越{' '}
+        <span class="font-mono text-[var(--text-primary)]">{archiveGroups.length}</span> 个年份。
+      </p>
+    </div>
+
+    <!-- Year -> Month Timeline -->
+    <div class="space-y-12">
+      {
+        archiveGroups.map((group) => (
+          <section class="relative">
+            <div class="flex items-baseline gap-4 mb-6">
+              <h2
+                class="text-3xl sm:text-4xl font-extrabold font-mono wuji-gradient-text"
+              >
+                {group.year}
+              </h2>
+              <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border-hairline)]">
+                {group.total} 篇文章
+              </span>
+            </div>
+
+            <div class="relative pl-6 sm:pl-8 border-l border-[var(--border-strong)] space-y-8">
+              {group.months.map((mGroup) => (
+                <div class="relative">
+                  <!-- Month marker dot -->
+                  <span
+                    class="absolute -left-[29px] sm:-left-[37px] top-1.5 w-3 h-3 rounded-full bg-[var(--bg-canvas)] border-2 border-[var(--accent-gold)] shadow-[0_0_10px_rgba(229,181,103,0.6)]"
+                  />
+                  <h3 class="text-sm font-mono uppercase tracking-[0.18em] text-[var(--accent-jade)] mb-3.5">
+                    {String(mGroup.month).padStart(2, '0')} 月 · {mGroup.posts.length} 篇
+                  </h3>
+
+                  <div class="space-y-3">
+                    {mGroup.posts.map((post) => {
+                      const meta = computePostMeta(post.body);
+                      const day = String(post.data.pubDate.getDate()).padStart(2, '0');
+                      const month = String(post.data.pubDate.getMonth() + 1).padStart(2, '0');
+                      return (
+                        <a
+                          href={`/blog/${post.id}`}
+                          class="wuji-card wuji-card-interactive group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-4 sm:px-5"
+                        >
+                          <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+                            <span class="shrink-0 text-xs font-mono text-[var(--text-muted)] pt-0.5 sm:pt-0">
+                              {month}-{day}
+                            </span>
+                            <span
+                              class="text-sm sm:text-base font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors line-clamp-1"
+                              style="font-family: var(--font-serif);"
+                            >
+                              {post.data.title}
+                            </span>
+                          </div>
+
+                          <div class="flex items-center gap-2.5 shrink-0 pl-10 sm:pl-0 text-xs">
+                            <span class="px-2.5 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--accent-gold)] border border-[var(--border-hairline)]">
+                              {post.data.category}
+                            </span>
+                            <span class="font-mono text-[var(--text-muted)]">
+                              {meta.readingMinutes} min
+                            </span>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

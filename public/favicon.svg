@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="wuji-gold" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f4d48e" />
+      <stop offset="55%" stop-color="#d8a24a" />
+      <stop offset="100%" stop-color="#38d9c0" />
+    </linearGradient>
+    <radialGradient id="wuji-bg" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#151924" />
+      <stop offset="100%" stop-color="#06070a" />
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#wuji-bg)" />
+  <rect x="1" y="1" width="62" height="62" rx="15" stroke="url(#wuji-gold)" stroke-opacity="0.35" stroke-width="1.2" />
+  <circle cx="32" cy="32" r="21" stroke="url(#wuji-gold)" stroke-width="1.6" stroke-dasharray="96 18" stroke-linecap="round" />
+  <path d="M32 14C41.941 14 50 22.059 50 32C50 41.941 41.941 50 32 50C27.029 50 23 45.971 23 41C23 36.029 27.029 32 32 32C36.971 32 41 27.971 41 23C41 18.029 36.971 14 32 14Z" fill="url(#wuji-gold)" fill-opacity="0.18" stroke="url(#wuji-gold)" stroke-width="1.5" />
+  <circle cx="32" cy="23" r="2.6" fill="#f4d48e" />
+  <circle cx="32" cy="41" r="2.6" fill="#38d9c0" />
+</svg>

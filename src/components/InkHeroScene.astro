@@ -16,7 +16,7 @@
 
 <div
   id="wuji-hero-shanshui"
-  class="absolute inset-0 overflow-hidden pointer-events-none select-none"
+  class="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none"
   style="contain: layout style paint;"
   aria-hidden="true"
 >
@@ -190,7 +190,8 @@
     { name: '秋暮', build: () => buildSnapshot(new Date(2026, 9, 24, 17, 25), '景·秋暮') },
     { name: '冬望', build: () => buildSnapshot(new Date(2026, 11, 21, 23, 30), '景·冬望') },
   ];
-  let presetIdx = 0;
+  let presetIdx = Number(sessionStorage.getItem('wuji-sky-preset') || 0);
+  if (Number.isNaN(presetIdx) || presetIdx < 0 || presetIdx >= PRESETS.length) presetIdx = 0;
 
   // =========================================================
   // 2. Seasonal Corner Ink Branch SVG (春柳 / 夏竹 / 秋枝 / 冬梅)
@@ -279,7 +280,7 @@
       let tabVisible = !document.hidden;
       let rafId = 0;
       let lastFrame = 0;
-      let snapshot = PRESETS[0].build();
+      let snapshot = PRESETS[presetIdx].build();
 
       interface SeasonalParticle {
         x: number;
@@ -330,6 +331,12 @@
       function emitStatus() {
         const el = document.getElementById('wuji-sky-label');
         if (el) el.textContent = snapshot.label;
+        const navBtn = document.getElementById('nav-sky-btn');
+        if (navBtn) {
+          const pName = PRESETS[presetIdx].name;
+          navBtn.textContent = pName === '实时' ? '四时' : pName;
+          navBtn.title = snapshot.label;
+        }
         window.dispatchEvent(
           new CustomEvent('wuji-sky-update', {
             detail: { label: snapshot.label, presetName: PRESETS[presetIdx].name },
@@ -433,9 +440,8 @@
       }
 
       function resize() {
-        const rect = heroWrap!.getBoundingClientRect();
-        w = Math.max(320, Math.round(rect.width));
-        h = Math.max(420, Math.round(rect.height));
+        w = Math.max(320, window.innerWidth);
+        h = Math.max(420, window.innerHeight);
         canvas!.width = w;
         canvas!.height = h;
         initSeasonalEntities();
@@ -754,16 +760,7 @@
         }
       }
 
-      // Pause automatically when scrolled past hero or tab hidden
-      const io = new IntersectionObserver(
-        (entries) => {
-          inView = Boolean(entries[0]?.isIntersecting);
-          startIfVisible();
-        },
-        { threshold: 0.02 }
-      );
-      io.observe(heroWrap);
-
+      // Keep running smoothly across all pages; pause only when tab is hidden
       document.addEventListener('visibilitychange', () => {
         tabVisible = !document.hidden;
         startIfVisible();
@@ -777,9 +774,10 @@
         }
       }, 60000);
 
-      // Cycle season/time preview via "观四时"
+      // Cycle season/time preview via "观四时" (persisted across page navigations)
       window.addEventListener('wuji-cycle-sky', () => {
         presetIdx = (presetIdx + 1) % PRESETS.length;
+        sessionStorage.setItem('wuji-sky-preset', String(presetIdx));
         snapshot = PRESETS[presetIdx].build();
         initSeasonalEntities();
         emitStatus();
@@ -832,7 +830,6 @@
     window.addEventListener(
       'pointermove',
       (e) => {
-        if (window.scrollY > 720) return;
         tx = e.clientX / Math.max(window.innerWidth, 1) - 0.5;
         ty = e.clientY / Math.max(window.innerHeight, 1) - 0.5;
         if (!pRunning) {

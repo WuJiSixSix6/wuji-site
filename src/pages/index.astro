@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import InkHeroScene from '../components/InkHeroScene.astro';
 import PostCard from '../components/PostCard.astro';
 import { SITE, getCategoryMeta } from '../data/site';
 import {
@@ -24,8 +23,6 @@ const gridPosts = posts.filter((p) => p.id !== leadPost?.id).slice(0, 4);
        EXHIBITION-GRADE CHINESE INK WASH HERO (留白 · 画卷)
        ========================================================= -->
   <section class="relative -mt-24 pt-36 pb-16 sm:pt-44 sm:pb-20 overflow-hidden">
-    <InkHeroScene />
-
     <div class="relative z-10 max-w-5xl mx-auto px-5 sm:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_180px] gap-12 items-start">
         <!-- Left: Quiet Authoritative Editorial Typography -->

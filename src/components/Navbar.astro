@@ -79,6 +79,16 @@ function isActive(href: string) {
       <span class="h-3 w-[1px] bg-[var(--border-hairline)]" aria-hidden="true"></span>
 
       <button
+        id="nav-sky-btn"
+        type="button"
+        class="text-[var(--text-muted)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
+        aria-label="切换四时天轨景致"
+        title="点击切换预览春晨、夏夜、秋暮、冬望与实时天时"
+      >
+        四时
+      </button>
+
+      <button
         id="ink-fx-toggle-btn"
         type="button"
         class="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
@@ -176,6 +186,10 @@ function isActive(href: string) {
 
   themeBtn?.addEventListener('click', toggleTheme);
   window.addEventListener('wuji-request-theme-toggle', toggleTheme);
+
+  document.getElementById('nav-sky-btn')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('wuji-cycle-sky'));
+  });
 
   fxBtn?.addEventListener('click', () => {
     const currentlyEnabled = localStorage.getItem('wuji-ink-fx') !== 'off';

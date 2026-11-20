@@ -4,6 +4,7 @@ import { SITE } from '../data/site';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import CommandSearch from '../components/CommandSearch.astro';
+import InkHeroScene from '../components/InkHeroScene.astro';
 import InkInteractionCanvas from '../components/InkInteractionCanvas.astro';
 
 interface Props {
@@ -52,6 +53,9 @@ const pageTitle = title === SITE.title ? title : `${title} | ${SITE.shortTitle}`
   </head>
 
   <body class="relative flex flex-col min-h-screen">
+    <!-- Global Living Seasonal & Astronomical Ink-Wash Backdrop (All Pages & Articles) -->
+    <InkHeroScene />
+
     <!-- Auto-sleeping Interactive Ink Canvas (0% CPU when idle) -->
     <InkInteractionCanvas />
 

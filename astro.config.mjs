@@ -9,7 +9,7 @@ import remarkCallouts from './src/plugins/remark-callouts.mjs';
 import rehypeCodeChrome from './src/plugins/rehype-code-chrome.mjs';
 
 export default defineConfig({
-  site: 'http://156.238.235.2',
+  site: 'https://wujisixsix6.cn',
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],

@@ -1,0 +1,119 @@
+---
+/**
+ * Interactive Chinese Seal Stamp Appreciation Colophon (朱砂落印 · 赏文留痕)
+ * Visitors can pick a seal (绝妙 / 已阅 / 清雅) and stamp it onto the scroll
+ * with stamp-press animation + global ink/vermilion burst effect.
+ */
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+---
+
+<section
+  class="my-12 p-6 sm:p-7 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] relative overflow-hidden"
+  data-seal-slug={slug}
+  id="wuji-seal-colophon"
+>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+    <div class="space-y-1.5">
+      <div class="flex items-center gap-2">
+        <span class="wuji-seal w-6 h-6 text-xs">印</span>
+        <span class="text-xs font-mono uppercase tracking-[0.18em] text-[var(--accent-seal)]">
+          Colophon · 展卷落印
+        </span>
+      </div>
+      <p class="text-sm text-[var(--text-secondary)]">
+        若此篇有所启发，不妨择一朱砂印章，在卷尾盖章留念。
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2.5">
+      <button
+        type="button"
+        data-stamp-word="绝妙"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--accent-seal)]/35 bg-[var(--accent-seal-soft)] text-sm text-[var(--accent-seal)] hover:bg-[var(--accent-seal)] hover:text-[#fbf5ec] transition-all cursor-pointer"
+      >
+        <span class="font-calligraphy text-base">绝妙</span>
+        <span class="text-xs font-mono opacity-80" data-count-for="绝妙">0</span>
+      </button>
+      <button
+        type="button"
+        data-stamp-word="已阅"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] text-sm text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-all cursor-pointer"
+      >
+        <span class="font-calligraphy text-base">已阅</span>
+        <span class="text-xs font-mono opacity-75" data-count-for="已阅">0</span>
+      </button>
+      <button
+        type="button"
+        data-stamp-word="清雅"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--accent-jade)]/35 bg-[var(--accent-jade-soft)] text-sm text-[var(--accent-jade)] hover:bg-[var(--accent-jade)] hover:text-[#fbf5ec] transition-all cursor-pointer"
+      >
+        <span class="font-calligraphy text-base">清雅</span>
+        <span class="text-xs font-mono opacity-80" data-count-for="清雅">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stamped marks gallery -->
+  <div id="wuji-stamped-marks" class="mt-4 pt-4 border-t border-[var(--border-hairline)] hidden flex-wrap items-center gap-2.5">
+    <span class="text-xs text-[var(--text-muted)] font-mono mr-1">卷尾已印：</span>
+  </div>
+</section>
+
+<script>
+  const box = document.getElementById('wuji-seal-colophon');
+  const marksWrap = document.getElementById('wuji-stamped-marks');
+  if (box) {
+    const slug = box.dataset.sealSlug || 'default';
+    const key = `wuji-seals-${slug}`;
+    const stored: Record<string, number> = JSON.parse(localStorage.getItem(key) || '{}');
+
+    function syncUI() {
+      let hasAny = false;
+      box!.querySelectorAll<HTMLElement>('[data-count-for]').forEach((el) => {
+        const word = el.dataset.countFor || '';
+        const count = stored[word] || 0;
+        el.textContent = String(count);
+        if (count > 0) hasAny = true;
+      });
+
+      if (marksWrap && hasAny) {
+        marksWrap.classList.remove('hidden');
+        marksWrap.classList.add('flex');
+        const label = '<span class="text-xs text-[var(--text-muted)] font-mono mr-1">卷尾已印：</span>';
+        const badges = Object.entries(stored)
+          .filter(([, c]) => c > 0)
+          .map(
+            ([w, c]) =>
+              `<span class="wuji-seal px-2.5 py-1 text-sm animate-stamp-pop">${w}${c > 1 ? ` ×${c}` : ''}</span>`
+          )
+          .join('');
+        marksWrap.innerHTML = label + badges;
+      }
+    }
+
+    syncUI();
+
+    box.querySelectorAll<HTMLButtonElement>('.seal-trigger').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const word = btn.dataset.stampWord || '无极';
+        stored[word] = (stored[word] || 0) + 1;
+        localStorage.setItem(key, JSON.stringify(stored));
+        syncUI();
+
+        const rect = btn.getBoundingClientRect();
+        window.dispatchEvent(
+          new CustomEvent('wuji-stamp-effect', {
+            detail: {
+              x: e.clientX || rect.left + rect.width / 2,
+              y: e.clientY || rect.top + rect.height / 2,
+              text: word,
+            },
+          })
+        );
+      });
+    });
+  }
+</script>

@@ -5,6 +5,7 @@ import TableOfContents from '../../components/TableOfContents.astro';
 import ReadingProgress from '../../components/ReadingProgress.astro';
 import PostCard from '../../components/PostCard.astro';
 import WuJiLogo from '../../components/WuJiLogo.astro';
+import ArticleSealStamp from '../../components/ArticleSealStamp.astro';
 import { SITE } from '../../data/site';
 import {
   getChronologicalPosts,
@@ -155,6 +156,9 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
         <div class="wuji-prose">
           <Content />
         </div>
+
+        <!-- Interactive Vermilion Seal Stamp Colophon -->
+        <ArticleSealStamp slug={post.id} />
 
         <!-- Author Signature & End Card -->
         <div class="mt-14 p-6 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-5">

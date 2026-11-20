@@ -3,7 +3,7 @@ interface Props {
   size?: number;
   class?: string;
 }
-const { size = 34, class: className = '' } = Astro.props;
+const { size = 36, class: className = '' } = Astro.props;
 ---
 
 <svg
@@ -15,37 +15,32 @@ const { size = 34, class: className = '' } = Astro.props;
   class={className}
   aria-hidden="true"
 >
-  <defs>
-    <linearGradient id="wuji-logo-grad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#f4d48e" />
-      <stop offset="55%" stop-color="#d8a24a" />
-      <stop offset="100%" stop-color="#38d9c0" />
-    </linearGradient>
-  </defs>
-  <circle
-    cx="32"
-    cy="32"
-    r="27"
-    stroke="url(#wuji-logo-grad)"
-    stroke-opacity="0.35"
-    stroke-width="1.2"
-  />
-  <circle
-    cx="32"
-    cy="32"
-    r="22"
-    stroke="url(#wuji-logo-grad)"
-    stroke-width="1.6"
-    stroke-dasharray="98 20"
+  <path
+    d="M50.5 23.5C47.2 15.2 39 10.4 29.8 11.2C18.6 12.2 10.6 22 11.4 33.2C12.2 44.2 21.8 52.6 33 52C42.8 51.5 50.6 44.5 52.2 35.2"
+    stroke="currentColor"
+    stroke-width="3.2"
     stroke-linecap="round"
+    class="text-[var(--ink-primary)]"
   />
   <path
-    d="M32 13C42.493 13 51 21.507 51 32C51 42.493 42.493 51 32 51C26.753 51 22.5 46.747 22.5 41.5C22.5 36.253 26.753 32 32 32C37.247 32 41.5 27.747 41.5 22.5C41.5 17.253 37.247 13 32 13Z"
-    fill="url(#wuji-logo-grad)"
-    fill-opacity="0.16"
-    stroke="url(#wuji-logo-grad)"
-    stroke-width="1.5"
+    d="M46.5 19.5C42.2 14.4 35.4 12.2 28.5 13.4"
+    stroke="currentColor"
+    stroke-opacity="0.35"
+    stroke-width="1.2"
+    stroke-linecap="round"
+    stroke-dasharray="3 4"
+    class="text-[var(--ink-primary)]"
   />
-  <circle cx="32" cy="22.5" r="2.7" fill="#f4d48e" />
-  <circle cx="32" cy="41.5" r="2.7" fill="#38d9c0" />
+  <path
+    d="M32 15.5C38.4 15.5 41.8 20.2 41.8 24.5C41.8 29.3 36.8 32 32 32C27.2 32 22.2 34.7 22.2 39.5C22.2 44.2 26 48.2 32 48.2"
+    stroke="currentColor"
+    stroke-opacity="0.72"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    class="text-[var(--ink-primary)]"
+  />
+  <circle cx="32" cy="23.5" r="2.5" fill="currentColor" class="text-[var(--ink-primary)]" />
+  <circle cx="32" cy="40.5" r="2.5" fill="currentColor" class="text-[var(--accent-jade)]" />
+  <rect x="44" y="43" width="11" height="11" rx="2" fill="var(--accent-seal)" />
+  <path d="M47.2 46.2h4.6M47.2 50.6h4.6M49.5 46.2v4.4" stroke="#f7f2e8" stroke-width="1.15" stroke-linecap="round" />
 </svg>

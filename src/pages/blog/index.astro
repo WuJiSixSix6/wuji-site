@@ -66,7 +66,7 @@ const tags = getTagsMap(posts);
         <button
           type="button"
           data-cat="ALL"
-          class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-gold)] text-[#08090c]"
+          class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-seal)] text-[#fbf5ec]"
         >
           全部 ({posts.length})
         </button>
@@ -170,7 +170,7 @@ const tags = getTagsMap(posts);
       pills.forEach((p) => {
         const isCurrent = p === pill;
         p.className = isCurrent
-          ? 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-gold)] text-[#08090c]'
+          ? 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-seal)] text-[#fbf5ec]'
           : 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border-hairline)] hover:border-[var(--accent-gold)]/40 hover:text-[var(--text-primary)]';
       });
       applyFilters();

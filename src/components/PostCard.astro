@@ -13,7 +13,7 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
 ---
 
 <article
-  class="wuji-card wuji-card-interactive group flex flex-col overflow-hidden h-full"
+  class="wuji-card wuji-card-interactive ink-reveal group flex flex-col overflow-hidden h-full"
   data-category={post.data.category}
   data-tags={post.data.tags.join(',')}
   data-title={post.data.title.toLowerCase()}
@@ -32,30 +32,36 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
         tabindex="-1"
         aria-hidden="true"
       >
-        <!-- Decorative orbital geometry -->
+        <!-- Layered Ink-Wash Mountain Silhouette -->
         <svg
-          class="absolute right-4 bottom-3 w-28 h-28 opacity-20 group-hover:opacity-35 group-hover:scale-105 transition-all duration-500"
-          viewBox="0 0 120 120"
-          fill="none"
+          class="absolute inset-x-0 bottom-0 w-full h-24 text-white opacity-[0.12] group-hover:opacity-[0.2] group-hover:scale-105 transition-all duration-700"
+          viewBox="0 0 420 110"
+          preserveAspectRatio="none"
+          fill="currentColor"
         >
-          <circle cx="60" cy="60" r="46" stroke="#f4d48e" stroke-width="0.8" stroke-dasharray="6 6" />
-          <circle cx="60" cy="60" r="28" stroke="#38d9c0" stroke-width="0.9" />
-          <circle cx="60" cy="32" r="3" fill="#f4d48e" />
-          <circle cx="60" cy="88" r="3" fill="#38d9c0" />
+          <path d="M0,95 C55,62 95,38 155,58 C215,78 265,20 335,44 C378,58 400,66 420,54 L420,110 L0,110 Z" />
+        </svg>
+        <svg
+          class="absolute inset-x-0 bottom-0 w-full h-16 text-black opacity-[0.32]"
+          viewBox="0 0 420 80"
+          preserveAspectRatio="none"
+          fill="currentColor"
+        >
+          <path d="M0,65 C80,35 140,70 225,42 C305,16 365,54 420,38 L420,80 L0,80 Z" />
         </svg>
 
         <div class="relative z-10 h-full p-5 flex flex-col justify-between">
           <div class="flex items-center justify-between gap-2">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/45 backdrop-blur-md text-[#f5d896] border border-white/15">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-black/38 backdrop-blur-md text-[#f4ece0] border border-white/18">
               {post.data.category}
             </span>
             {post.data.pinned && (
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-[#e5b567]/20 text-[#f5d896] border border-[#e5b567]/40">
-                ✦ 置顶
+              <span class="wuji-seal px-2 py-0.5 text-xs tracking-widest">
+                置顶
               </span>
             )}
           </div>
-          <div class="flex items-center gap-3 text-[11px] font-mono text-white/75">
+          <div class="flex items-center gap-3 text-[11px] font-mono text-white/80">
             <span>{formatDate(post.data.pubDate)}</span>
             <span>·</span>
             <span>{readingMinutes} 分钟</span>
@@ -71,7 +77,7 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
     {
       compact && (
         <div class="flex items-center justify-between gap-2 mb-3 text-xs font-mono text-[var(--text-muted)]">
-          <span class="px-2.5 py-0.5 rounded-full bg-[var(--accent-gold-soft)] text-[var(--accent-gold)] font-sans font-medium">
+          <span class="px-2.5 py-0.5 rounded-lg bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] font-sans font-medium">
             {post.data.category}
           </span>
           <span>{formatDate(post.data.pubDate)}</span>
@@ -80,7 +86,7 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
     }
 
     <h3
-      class="text-lg sm:text-xl font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+      class="text-lg sm:text-xl font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors line-clamp-2"
       style="font-family: var(--font-serif);"
     >
       <a href={`/blog/${post.id}`} class="focus:outline-none">
@@ -108,9 +114,9 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
       </div>
       <a
         href={`/blog/${post.id}`}
-        class="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-gold)] group-hover:translate-x-0.5 transition-transform"
+        class="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-seal)] group-hover:translate-x-0.5 transition-transform"
       >
-        阅读全文
+        展卷细读
         <span aria-hidden="true">→</span>
       </a>
     </div>

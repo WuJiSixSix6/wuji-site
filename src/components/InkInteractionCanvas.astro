@@ -1,0 +1,430 @@
+---
+/**
+ * Global Full-Viewport Chinese Ink Wash Interactive Effects Canvas:
+ * 1. Pressure/velocity-sensitive calligraphic brush trail following pointer
+ * 2. Organic ink-bloom splashes, splatter droplets & water-ink ripples on click
+ * 3. Drifting ink petals / bamboo wisps that swirl gently around cursor
+ * 4. Custom events: `wuji-ink-splash` & `wuji-stamp-effect` for interactive controls
+ */
+---
+
+<canvas
+  id="wuji-ink-fx-canvas"
+  class="fixed inset-0 w-full h-full pointer-events-none z-30"
+  aria-hidden="true"
+></canvas>
+
+<script>
+  const canvas = document.getElementById('wuji-ink-fx-canvas') as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let enabled = localStorage.getItem('wuji-ink-fx') !== 'off';
+      let rafId = 0;
+
+      const pointer = { x: -999, y: -999, px: -999, py: -999, active: false };
+
+      interface TrailSegment {
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+        width: number;
+        alpha: number;
+        isRed: boolean;
+      }
+
+      interface InkBloom {
+        x: number;
+        y: number;
+        r: number;
+        maxR: number;
+        alpha: number;
+        isRed: boolean;
+        lobes: number[];
+      }
+
+      interface InkRipple {
+        x: number;
+        y: number;
+        r: number;
+        maxR: number;
+        alpha: number;
+        isRed: boolean;
+      }
+
+      interface InkDroplet {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        r: number;
+        alpha: number;
+        isRed: boolean;
+      }
+
+      interface InkPetal {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        rot: number;
+        vrot: number;
+        size: number;
+        alpha: number;
+        isRed: boolean;
+      }
+
+      interface FloatingSeal {
+        x: number;
+        y: number;
+        text: string;
+        scale: number;
+        alpha: number;
+        rot: number;
+      }
+
+      const trails: TrailSegment[] = [];
+      const blooms: InkBloom[] = [];
+      const ripples: InkRipple[] = [];
+      const droplets: InkDroplet[] = [];
+      const seals: FloatingSeal[] = [];
+
+      const petals: InkPetal[] = Array.from({ length: 18 }, (_, i) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: -0.22 - Math.random() * 0.35,
+        vy: 0.25 + Math.random() * 0.42,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.025,
+        size: 4 + Math.random() * 6,
+        alpha: 0.16 + Math.random() * 0.24,
+        isRed: i % 5 === 0,
+      }));
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas!.width = Math.floor(width * dpr);
+        canvas!.height = Math.floor(height * dpr);
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function getPalette(isRed: boolean) {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isRed) {
+          return isDark ? '222, 76, 68' : '185, 43, 39';
+        }
+        return isDark ? '218, 224, 226' : '24, 28, 31';
+      }
+
+      function spawnInkSplash(x: number, y: number, isRed = false, big = false) {
+        if (!enabled) return;
+        const count = big ? 3 : 1;
+        for (let c = 0; c < count; c++) {
+          const ox = big ? (Math.random() - 0.5) * 90 : 0;
+          const oy = big ? (Math.random() - 0.5) * 60 : 0;
+          const lobes = Array.from({ length: 10 }, () => 0.78 + Math.random() * 0.44);
+          blooms.push({
+            x: x + ox,
+            y: y + oy,
+            r: big ? 10 : 5,
+            maxR: big ? 58 + Math.random() * 52 : 28 + Math.random() * 26,
+            alpha: big ? 0.34 : 0.24,
+            isRed: isRed || (big && c === 1),
+            lobes,
+          });
+        }
+
+        ripples.push({
+          x,
+          y,
+          r: 6,
+          maxR: big ? 135 : 74,
+          alpha: 0.34,
+          isRed,
+        });
+
+        const dropCount = big ? 28 : 11;
+        for (let i = 0; i < dropCount; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = (big ? 2.4 : 1.2) + Math.random() * (big ? 5.8 : 3.2);
+          droplets.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            r: 1.2 + Math.random() * (big ? 3.8 : 2.3),
+            alpha: 0.55 + Math.random() * 0.35,
+            isRed: isRed || (big && i % 4 === 0),
+          });
+        }
+      }
+
+      function spawnStamp(x: number, y: number, text = '无极') {
+        if (!enabled) return;
+        seals.push({
+          x,
+          y,
+          text,
+          scale: 1.75,
+          alpha: 0.96,
+          rot: (Math.random() - 0.5) * 0.24,
+        });
+        spawnInkSplash(x, y, true, false);
+      }
+
+      function onPointerMove(e: PointerEvent) {
+        if (!enabled) return;
+        const x = e.clientX;
+        const y = e.clientY;
+
+        if (pointer.active) {
+          const dx = x - pointer.x;
+          const dy = y - pointer.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 2.2) {
+            // Brush width narrows gracefully at higher speed (like real calligraphy)
+            const w = Math.max(1.2, Math.min(7.5, 9.5 - dist * 0.14));
+            trails.push({
+              x1: pointer.x,
+              y1: pointer.y,
+              x2: x,
+              y2: y,
+              width: w,
+              alpha: 0.26,
+              isRed: false,
+            });
+            if (trails.length > 55) trails.shift();
+
+            // Occasional subtle ink mist bead along stroke
+            if (dist > 14 && Math.random() < 0.35) {
+              droplets.push({
+                x,
+                y,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8 + 0.2,
+                r: 0.9 + Math.random() * 1.4,
+                alpha: 0.28,
+                isRed: false,
+              });
+            }
+          }
+        }
+        pointer.px = pointer.x;
+        pointer.py = pointer.y;
+        pointer.x = x;
+        pointer.y = y;
+        pointer.active = true;
+      }
+
+      function onPointerDown(e: PointerEvent) {
+        if (!enabled) return;
+        // Skip intense splash inside inputs/modals
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        const isInteractive = Boolean((e.target as HTMLElement)?.closest('a, button'));
+        spawnInkSplash(e.clientX, e.clientY, isInteractive, false);
+      }
+
+      function draw() {
+        ctx!.clearRect(0, 0, width, height);
+
+        if (!enabled) {
+          rafId = requestAnimationFrame(draw);
+          return;
+        }
+
+        // 1. Drifting ink petals & bamboo wisps
+        for (const p of petals) {
+          // Gentle repulsion near pointer
+          const dx = p.x - pointer.x;
+          const dy = p.y - pointer.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 110 && dist > 0.1) {
+            const force = ((110 - dist) / 110) * 0.16;
+            p.vx += (dx / dist) * force;
+            p.vy += (dy / dist) * force;
+          }
+
+          p.vx *= 0.985;
+          p.vy = p.vy * 0.985 + 0.008;
+          if (p.vx > -0.12) p.vx -= 0.004;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+
+          if (p.y > height + 20) { p.y = -15; p.x = Math.random() * width; }
+          if (p.x < -20) { p.x = width + 15; }
+          if (p.x > width + 25) { p.x = -15; }
+
+          ctx!.save();
+          ctx!.translate(p.x, p.y);
+          ctx!.rotate(p.rot);
+          ctx!.fillStyle = `rgba(${getPalette(p.isRed)}, ${p.alpha})`;
+          ctx!.beginPath();
+          ctx!.ellipse(0, 0, p.size, p.size * 0.36, 0, 0, Math.PI * 2);
+          ctx!.fill();
+          ctx!.restore();
+        }
+
+        // 2. Calligraphic brush trail
+        ctx!.lineCap = 'round';
+        for (let i = trails.length - 1; i >= 0; i--) {
+          const s = trails[i];
+          s.alpha -= 0.0095;
+          s.width *= 0.985;
+          if (s.alpha <= 0.005) {
+            trails.splice(i, 1);
+            continue;
+          }
+          ctx!.strokeStyle = `rgba(${getPalette(s.isRed)}, ${s.alpha})`;
+          ctx!.lineWidth = s.width;
+          ctx!.beginPath();
+          ctx!.moveTo(s.x1, s.y1);
+          ctx!.lineTo(s.x2, s.y2);
+          ctx!.stroke();
+        }
+
+        // 3. Organic ink blooms
+        for (let i = blooms.length - 1; i >= 0; i--) {
+          const b = blooms[i];
+          b.r += (b.maxR - b.r) * 0.085;
+          b.alpha -= 0.0045;
+          if (b.alpha <= 0.004) {
+            blooms.splice(i, 1);
+            continue;
+          }
+
+          ctx!.save();
+          ctx!.translate(b.x, b.y);
+          const grad = ctx!.createRadialGradient(0, 0, b.r * 0.1, 0, 0, b.r);
+          const rgb = getPalette(b.isRed);
+          grad.addColorStop(0, `rgba(${rgb}, ${b.alpha})`);
+          grad.addColorStop(0.65, `rgba(${rgb}, ${b.alpha * 0.55})`);
+          grad.addColorStop(1, `rgba(${rgb}, 0)`);
+          ctx!.fillStyle = grad;
+          ctx!.beginPath();
+          const n = b.lobes.length;
+          for (let k = 0; k <= n; k++) {
+            const ang = (k / n) * Math.PI * 2;
+            const rad = b.r * b.lobes[k % n];
+            const px = Math.cos(ang) * rad;
+            const py = Math.sin(ang) * rad;
+            if (k === 0) ctx!.moveTo(px, py);
+            else ctx!.lineTo(px, py);
+          }
+          ctx!.closePath();
+          ctx!.fill();
+          ctx!.restore();
+        }
+
+        // 4. Water-ink ripples
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          const r = ripples[i];
+          r.r += (r.maxR - r.r) * 0.08;
+          r.alpha -= 0.008;
+          if (r.alpha <= 0.005) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          ctx!.strokeStyle = `rgba(${getPalette(r.isRed)}, ${r.alpha})`;
+          ctx!.lineWidth = 1.25;
+          ctx!.beginPath();
+          ctx!.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+          ctx!.stroke();
+        }
+
+        // 5. Splatter droplets
+        for (let i = droplets.length - 1; i >= 0; i--) {
+          const d = droplets[i];
+          d.x += d.vx;
+          d.y += d.vy;
+          d.vx *= 0.93;
+          d.vy = d.vy * 0.93 + 0.05;
+          d.alpha -= 0.015;
+          if (d.alpha <= 0.01) {
+            droplets.splice(i, 1);
+            continue;
+          }
+          ctx!.fillStyle = `rgba(${getPalette(d.isRed)}, ${d.alpha})`;
+          ctx!.beginPath();
+          ctx!.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx!.fill();
+        }
+
+        // 6. Floating animated vermilion seals (落印特效)
+        for (let i = seals.length - 1; i >= 0; i--) {
+          const s = seals[i];
+          s.scale += (1 - s.scale) * 0.18;
+          s.alpha -= 0.0052;
+          if (s.alpha <= 0.01) {
+            seals.splice(i, 1);
+            continue;
+          }
+          ctx!.save();
+          ctx!.translate(s.x, s.y);
+          ctx!.rotate(s.rot);
+          ctx!.scale(s.scale, s.scale);
+          ctx!.globalAlpha = Math.min(1, s.alpha * 1.15);
+          ctx!.fillStyle = 'rgba(185, 43, 39, 0.92)';
+          ctx!.strokeStyle = 'rgba(255, 236, 224, 0.55)';
+          ctx!.lineWidth = 1.5;
+          ctx!.beginPath();
+          ctx!.roundRect(-24, -24, 48, 48, 6);
+          ctx!.fill();
+          ctx!.stroke();
+          ctx!.fillStyle = '#fbf4ea';
+          ctx!.font = '20px "Ma Shan Zheng", "Noto Serif SC", serif';
+          ctx!.textAlign = 'center';
+          ctx!.textBaseline = 'middle';
+          ctx!.fillText(s.text, 0, 2);
+          ctx!.restore();
+        }
+
+        rafId = requestAnimationFrame(draw);
+      }
+
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('pointerdown', onPointerDown, { passive: true });
+
+      window.addEventListener('wuji-ink-toggle', ((e: CustomEvent) => {
+        enabled = Boolean(e.detail?.enabled);
+        if (!enabled) {
+          trails.length = 0;
+          blooms.length = 0;
+          ripples.length = 0;
+          droplets.length = 0;
+          seals.length = 0;
+        }
+      }) as EventListener);
+
+      window.addEventListener('wuji-ink-splash', ((e: CustomEvent) => {
+        const d = e.detail || {};
+        spawnInkSplash(
+          d.x ?? width * (0.3 + Math.random() * 0.45),
+          d.y ?? height * (0.22 + Math.random() * 0.42),
+          Boolean(d.isRed),
+          d.big !== false
+        );
+      }) as EventListener);
+
+      window.addEventListener('wuji-stamp-effect', ((e: CustomEvent) => {
+        const d = e.detail || {};
+        spawnStamp(
+          d.x ?? width * (0.52 + Math.random() * 0.25),
+          d.y ?? height * (0.26 + Math.random() * 0.34),
+          d.text || '无极'
+        );
+      }) as EventListener);
+
+      draw();
+    }
+  }
+</script>

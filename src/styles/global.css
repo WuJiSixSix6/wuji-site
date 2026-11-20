@@ -1,44 +1,60 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
+/* =========================================================
+   中国水墨丹青色彩体系
+   Default: 宣纸水墨 (Xuan Paper Ink Wash)
+   .dark:   墨夜玄青 (Nocturnal Ink Wash)
+   ========================================================= */
 :root {
-  --bg-canvas: #06070a;
-  --bg-surface: #0c0f16;
-  --bg-elevated: #121622;
-  --bg-glass: rgba(12, 15, 22, 0.72);
-  --text-primary: #f2f4f8;
-  --text-secondary: #a7b0c2;
-  --text-muted: #6c768a;
-  --accent-gold: #e5b567;
-  --accent-gold-soft: rgba(229, 181, 103, 0.14);
-  --accent-jade: #38d9c0;
-  --accent-jade-soft: rgba(56, 217, 192, 0.12);
-  --accent-crimson: #ef6f82;
-  --border-hairline: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --shadow-card: 0 20px 50px -20px rgba(0, 0, 0, 0.75);
-  --font-sans: "Inter", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --font-serif: "Noto Serif SC", "Songti SC", Georgia, serif;
-  --font-display: "Syne", "Noto Serif SC", "Inter", sans-serif;
+  --bg-canvas: #f4efe6;
+  --bg-surface: #fbf8f2;
+  --bg-elevated: #ece5d8;
+  --bg-glass: rgba(247, 242, 233, 0.84);
+  --ink-primary: #181c1f;
+  --text-primary: #181c1f;
+  --text-secondary: #43494e;
+  --text-muted: #767c80;
+  --accent-seal: #b92b27;
+  --accent-seal-soft: rgba(185, 43, 39, 0.1);
+  --accent-gold: #b92b27;
+  --accent-gold-soft: rgba(185, 43, 39, 0.09);
+  --accent-jade: #2b6469;
+  --accent-jade-soft: rgba(43, 100, 105, 0.1);
+  --accent-amber: #9b6f2b;
+  --accent-crimson: #b92b27;
+  --border-hairline: rgba(24, 28, 31, 0.11);
+  --border-strong: rgba(24, 28, 31, 0.24);
+  --shadow-card: 0 18px 44px -24px rgba(24, 28, 31, 0.22);
+  --spotlight-color: rgba(24, 28, 31, 0.065);
+  --font-sans: "Noto Serif SC", "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+  --font-calligraphy: "Ma Shan Zheng", "Zhi Mang Xing", "STKaiti", "KaiTi", "Noto Serif SC", serif;
+  --font-display: "Ma Shan Zheng", "Noto Serif SC", serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-html.light {
-  --bg-canvas: #f7f4ee;
-  --bg-surface: #ffffff;
-  --bg-elevated: #f0ece3;
-  --bg-glass: rgba(247, 244, 238, 0.82);
-  --text-primary: #14171f;
-  --text-secondary: #4a5263;
-  --text-muted: #7b8394;
-  --accent-gold: #b47a1f;
-  --accent-gold-soft: rgba(180, 122, 31, 0.12);
-  --accent-jade: #0d8a78;
-  --accent-jade-soft: rgba(13, 138, 120, 0.1);
-  --accent-crimson: #c83e54;
-  --border-hairline: rgba(20, 23, 31, 0.09);
-  --border-strong: rgba(20, 23, 31, 0.18);
-  --shadow-card: 0 18px 42px -22px rgba(20, 23, 31, 0.16);
+html.dark {
+  --bg-canvas: #0d1013;
+  --bg-surface: #13181d;
+  --bg-elevated: #1a2026;
+  --bg-glass: rgba(16, 20, 24, 0.8);
+  --ink-primary: #ece5d8;
+  --text-primary: #ece5d8;
+  --text-secondary: #a8b0b3;
+  --text-muted: #6e787d;
+  --accent-seal: #de4c44;
+  --accent-seal-soft: rgba(222, 76, 68, 0.15);
+  --accent-gold: #de4c44;
+  --accent-gold-soft: rgba(222, 76, 68, 0.14);
+  --accent-jade: #63b5ac;
+  --accent-jade-soft: rgba(99, 181, 172, 0.13);
+  --accent-amber: #d8ac62;
+  --accent-crimson: #e4635c;
+  --border-hairline: rgba(236, 229, 216, 0.1);
+  --border-strong: rgba(236, 229, 216, 0.22);
+  --shadow-card: 0 22px 54px -22px rgba(0, 0, 0, 0.85);
+  --spotlight-color: rgba(236, 229, 216, 0.075);
 }
 
 @layer base {
@@ -57,34 +73,148 @@ html.light {
     background-color: var(--bg-canvas);
     color: var(--text-primary);
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.45s ease, color 0.45s ease;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 15% 0%, rgba(43, 100, 105, 0.055), transparent 60%),
+      radial-gradient(ellipse 70% 45% at 88% 12%, rgba(185, 43, 39, 0.04), transparent 55%);
+  }
+
+  html.dark body {
+    background-image:
+      radial-gradient(ellipse 75% 50% at 20% 0%, rgba(99, 181, 172, 0.07), transparent 60%),
+      radial-gradient(ellipse 65% 45% at 85% 10%, rgba(222, 76, 68, 0.06), transparent 55%);
   }
 
   ::selection {
-    background-color: rgba(229, 181, 103, 0.28);
+    background-color: rgba(185, 43, 39, 0.22);
     color: var(--text-primary);
   }
 }
 
-/* Ambient architectural grid & subtle noise */
-.wuji-grid-bg {
-  background-image:
-    linear-gradient(to right, var(--border-hairline) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border-hairline) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, black 35%, transparent 100%);
+/* Subtle Xuan Paper fiber grain overlay */
+.xuan-paper-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
 }
 
-/* Luxury surface card */
+html.dark .xuan-paper-grain {
+  opacity: 0.032;
+}
+
+/* Calligraphic font utility */
+.font-calligraphy {
+  font-family: var(--font-calligraphy);
+}
+
+/* Vertical Chinese inscription (立轴题跋) */
+.vertical-inscription {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.28em;
+}
+
+/* Authentic Carved Vermilion Seal Stamp (朱砂印章) */
+.wuji-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-calligraphy);
+  color: #fbf5ec;
+  background: linear-gradient(145deg, #c7352f 0%, #a5221f 100%);
+  border: 1.5px solid rgba(255, 232, 224, 0.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(120, 15, 12, 0.4),
+    0 6px 16px -6px rgba(185, 43, 39, 0.55);
+  border-radius: 0.35rem;
+  user-select: none;
+  position: relative;
+}
+
+.wuji-seal-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-calligraphy);
+  color: var(--accent-seal);
+  border: 1.5px solid var(--accent-seal);
+  background: var(--accent-seal-soft);
+  border-radius: 0.35rem;
+  letter-spacing: 0.12em;
+}
+
+/* Ink Brush Divider (水墨笔触分隔线) */
+.ink-divider {
+  height: 2px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border-strong) 18%,
+    var(--ink-primary) 50%,
+    var(--border-strong) 82%,
+    transparent 100%
+  );
+  opacity: 0.25;
+}
+
+/* Scroll Glass Surface */
+.wuji-glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+/* Ink Wash Gradient Text */
+.wuji-gradient-text {
+  background: linear-gradient(125deg, #181c1f 0%, #3d484d 45%, #b92b27 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.dark .wuji-gradient-text {
+  background: linear-gradient(125deg, #f5efe3 0%, #98c7c1 52%, #e05248 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* =========================================================
+   Interactive Ink Card + 3D Tilt + Radial Ink Spotlight
+   ========================================================= */
 .wuji-card {
   position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   box-shadow: var(--shadow-card);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.3s ease,
     box-shadow 0.35s ease;
+  transform-style: preserve-3d;
+}
+
+.wuji-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 50%),
+    var(--spotlight-color),
+    transparent 68%
+  );
+}
+
+.wuji-card:hover::after {
+  opacity: 1;
 }
 
 .wuji-card:hover {
@@ -92,73 +222,78 @@ html.light {
 }
 
 .wuji-card-interactive:hover {
-  transform: translateY(-3px);
-  border-color: rgba(229, 181, 103, 0.38);
+  border-color: rgba(185, 43, 39, 0.42);
+  box-shadow: 0 24px 50px -24px rgba(24, 28, 31, 0.34);
 }
 
-html.light .wuji-card-interactive:hover {
-  border-color: rgba(180, 122, 31, 0.42);
+html.dark .wuji-card-interactive:hover {
+  border-color: rgba(222, 76, 68, 0.45);
+  box-shadow: 0 24px 56px -22px rgba(0, 0, 0, 0.9);
 }
 
-.wuji-glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
+/* Scroll-triggered Ink Unfold Reveal */
+.ink-reveal {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  filter: blur(4px);
+  transition:
+    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.72s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Gold-Jade signature gradient text */
-.wuji-gradient-text {
-  background: linear-gradient(125deg, #f7dfaa 0%, #e5b567 48%, #38d9c0 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.ink-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
 }
 
-html.light .wuji-gradient-text {
-  background: linear-gradient(125deg, #9a6312 0%, #c48723 50%, #0d8a78 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* Magnetic Button */
+.ink-magnetic {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+  will-change: transform;
 }
 
-/* Cover theme gradients for article artwork */
+/* =========================================================
+   5 Chinese Ink-Wash Landscape Card Covers
+   ========================================================= */
 .cover-celestial-gold {
   background:
-    radial-gradient(circle at 20% 20%, rgba(229, 181, 103, 0.36), transparent 55%),
-    radial-gradient(circle at 85% 75%, rgba(56, 217, 192, 0.24), transparent 55%),
-    linear-gradient(135deg, #0d1018 0%, #17141f 55%, #0c1418 100%);
+    radial-gradient(circle at 82% 24%, rgba(185, 43, 39, 0.45), transparent 32%),
+    radial-gradient(circle at 20% 85%, rgba(43, 100, 105, 0.38), transparent 55%),
+    linear-gradient(155deg, #1b2024 0%, #2a3035 48%, #15191c 100%);
 }
 .cover-jade-nebula {
   background:
-    radial-gradient(circle at 75% 25%, rgba(56, 217, 192, 0.36), transparent 55%),
-    radial-gradient(circle at 15% 80%, rgba(79, 152, 240, 0.28), transparent 55%),
-    linear-gradient(135deg, #071316 0%, #0c1a24 55%, #0b1019 100%);
+    radial-gradient(circle at 75% 22%, rgba(99, 181, 172, 0.36), transparent 46%),
+    radial-gradient(circle at 18% 82%, rgba(28, 62, 68, 0.55), transparent 55%),
+    linear-gradient(155deg, #112023 0%, #1b3136 52%, #0f1619 100%);
 }
 .cover-obsidian-aurora {
   background:
-    radial-gradient(circle at 30% 70%, rgba(168, 120, 245, 0.28), transparent 55%),
-    radial-gradient(circle at 80% 20%, rgba(56, 217, 192, 0.3), transparent 52%),
-    linear-gradient(135deg, #0a0c14 0%, #131224 52%, #091318 100%);
+    radial-gradient(circle at 24% 30%, rgba(145, 160, 168, 0.24), transparent 50%),
+    radial-gradient(circle at 80% 75%, rgba(43, 100, 105, 0.36), transparent 55%),
+    linear-gradient(155deg, #14171a 0%, #24292e 50%, #101316 100%);
 }
 .cover-crimson-ink {
   background:
-    radial-gradient(circle at 75% 30%, rgba(239, 111, 130, 0.32), transparent 55%),
-    radial-gradient(circle at 20% 75%, rgba(229, 181, 103, 0.28), transparent 55%),
-    linear-gradient(135deg, #150b10 0%, #1b1116 55%, #0d0e14 100%);
+    radial-gradient(circle at 78% 28%, rgba(204, 58, 50, 0.44), transparent 42%),
+    radial-gradient(circle at 18% 76%, rgba(155, 111, 43, 0.3), transparent 52%),
+    linear-gradient(155deg, #211415 0%, #2d1b1d 52%, #141214 100%);
 }
 .cover-azure-void {
   background:
-    radial-gradient(circle at 25% 25%, rgba(76, 162, 255, 0.34), transparent 55%),
-    radial-gradient(circle at 80% 80%, rgba(229, 181, 103, 0.24), transparent 55%),
-    linear-gradient(135deg, #080e1a 0%, #0e192c 55%, #090d14 100%);
+    radial-gradient(circle at 26% 24%, rgba(76, 128, 156, 0.35), transparent 48%),
+    radial-gradient(circle at 82% 78%, rgba(155, 111, 43, 0.28), transparent 52%),
+    linear-gradient(155deg, #121b22 0%, #1c2a34 52%, #0f1419 100%);
 }
 
 /* =========================================================
    Editorial Prose Styling (.wuji-prose)
    ========================================================= */
 .wuji-prose {
-  font-size: 1.05rem;
-  line-height: 1.9;
+  font-size: 1.06rem;
+  line-height: 1.95;
   color: var(--text-secondary);
   word-break: break-word;
 }
@@ -171,21 +306,29 @@ html.light .wuji-gradient-text {
   font-family: var(--font-serif);
   font-size: 1.65rem;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.38;
   color: var(--text-primary);
   margin-top: 3rem;
   margin-bottom: 1.15rem;
-  padding-bottom: 0.55rem;
+  padding-bottom: 0.6rem;
   border-bottom: 1px solid var(--border-hairline);
   scroll-margin-top: 6rem;
-  letter-spacing: -0.01em;
+  position: relative;
+}
+
+.wuji-prose h2::before {
+  content: "▪";
+  color: var(--accent-seal);
+  margin-right: 0.5rem;
+  font-size: 0.78em;
+  vertical-align: 0.08em;
 }
 
 .wuji-prose h3 {
   font-family: var(--font-serif);
   font-size: 1.3rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 700;
+  line-height: 1.42;
   color: var(--text-primary);
   margin-top: 2.2rem;
   margin-bottom: 0.85rem;
@@ -202,19 +345,19 @@ html.light .wuji-gradient-text {
 }
 
 .wuji-prose p {
-  margin-top: 1.1rem;
-  margin-bottom: 1.1rem;
+  margin-top: 1.15rem;
+  margin-bottom: 1.15rem;
 }
 
 .wuji-prose strong {
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .wuji-prose a {
-  color: var(--accent-gold);
+  color: var(--accent-seal);
   text-decoration: underline;
-  text-decoration-color: rgba(229, 181, 103, 0.38);
+  text-decoration-color: rgba(185, 43, 39, 0.36);
   text-underline-offset: 4px;
   transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
@@ -227,32 +370,27 @@ html.light .wuji-gradient-text {
 .wuji-prose ul,
 .wuji-prose ol {
   margin: 1.15rem 0;
-  padding-left: 1.5rem;
+  padding-left: 1.55rem;
 }
 
-.wuji-prose ul {
-  list-style-type: disc;
-}
-
-.wuji-prose ol {
-  list-style-type: decimal;
-}
+.wuji-prose ul { list-style-type: disc; }
+.wuji-prose ol { list-style-type: decimal; }
 
 .wuji-prose li {
-  margin: 0.45rem 0;
+  margin: 0.48rem 0;
   padding-left: 0.25rem;
 }
 
 .wuji-prose li::marker {
-  color: var(--accent-gold);
+  color: var(--accent-seal);
 }
 
 .wuji-prose blockquote {
-  margin: 1.6rem 0;
-  padding: 1rem 1.35rem;
-  border-left: 3px solid var(--accent-gold);
-  background: var(--accent-gold-soft);
-  border-radius: 0 0.85rem 0.85rem 0;
+  margin: 1.7rem 0;
+  padding: 1.05rem 1.4rem;
+  border-left: 3px solid var(--accent-seal);
+  background: var(--accent-seal-soft);
+  border-radius: 0 0.75rem 0.75rem 0;
   color: var(--text-primary);
   font-family: var(--font-serif);
   font-size: 1.04rem;
@@ -271,16 +409,16 @@ html.light .wuji-gradient-text {
 
 .wuji-prose :not(pre) > code {
   font-family: var(--font-mono);
-  font-size: 0.86em;
-  padding: 0.16em 0.42em;
-  border-radius: 0.4rem;
+  font-size: 0.85em;
+  padding: 0.15em 0.42em;
+  border-radius: 0.35rem;
   background: var(--bg-elevated);
   border: 1px solid var(--border-hairline);
-  color: var(--accent-gold);
+  color: var(--accent-seal);
 }
 
 .wuji-prose img {
-  border-radius: 1rem;
+  border-radius: 0.85rem;
   border: 1px solid var(--border-hairline);
   margin: 1.75rem auto;
   max-width: 100%;
@@ -289,11 +427,6 @@ html.light .wuji-gradient-text {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.wuji-prose img:hover {
-  box-shadow: 0 18px 40px -15px rgba(0, 0, 0, 0.55);
-}
-
-/* Tables */
 .wuji-prose table {
   width: 100%;
   border-collapse: collapse;
@@ -302,7 +435,8 @@ html.light .wuji-gradient-text {
   display: block;
   overflow-x: auto;
   border: 1px solid var(--border-hairline);
-  border-radius: 0.85rem;
+  border-radius: 0.75rem;
+  background: var(--bg-surface);
 }
 
 .wuji-prose thead {
@@ -311,61 +445,50 @@ html.light .wuji-gradient-text {
 
 .wuji-prose th {
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 700;
   text-align: left;
-  padding: 0.8rem 1rem;
+  padding: 0.82rem 1rem;
   border-bottom: 1px solid var(--border-strong);
   white-space: nowrap;
 }
 
 .wuji-prose td {
-  padding: 0.72rem 1rem;
+  padding: 0.74rem 1rem;
   border-bottom: 1px solid var(--border-hairline);
   color: var(--text-secondary);
 }
 
-.wuji-prose tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.wuji-prose tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-html.light .wuji-prose tbody tr:hover {
-  background: rgba(20, 23, 31, 0.025);
-}
+.wuji-prose tbody tr:last-child td { border-bottom: none; }
 
 /* =========================================================
-   Shiki Dual-Theme Code Block Chrome
+   Shiki Dual-Theme Code Block Chrome (墨砚代码匣)
    ========================================================= */
 .wuji-code-block {
   margin: 1.65rem 0;
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   overflow: hidden;
   border: 1px solid var(--border-hairline);
-  background: #0d1017;
-  box-shadow: 0 16px 36px -22px rgba(0, 0, 0, 0.75);
+  background: #faf6ee;
+  box-shadow: 0 12px 30px -22px rgba(24, 28, 31, 0.24);
 }
 
-html.light .wuji-code-block {
-  background: #faf9f5;
-  border-color: rgba(20, 23, 31, 0.12);
-  box-shadow: 0 12px 30px -22px rgba(20, 23, 31, 0.22);
+html.dark .wuji-code-block {
+  background: #0b0e11;
+  border-color: rgba(236, 229, 216, 0.11);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
 }
 
 .wuji-code-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.62rem 1rem;
+  background: rgba(24, 28, 31, 0.045);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
-html.light .wuji-code-header {
-  background: rgba(20, 23, 31, 0.035);
-  border-bottom-color: rgba(20, 23, 31, 0.08);
+html.dark .wuji-code-header {
+  background: rgba(236, 229, 216, 0.035);
 }
 
 .wuji-code-dots {
@@ -375,21 +498,20 @@ html.light .wuji-code-header {
 }
 
 .wuji-code-dots .dot {
-  width: 0.62rem;
-  height: 0.62rem;
+  width: 0.58rem;
+  height: 0.58rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.16);
 }
 
-.wuji-code-dots .dot:nth-child(1) { background: rgba(239, 111, 130, 0.75); }
-.wuji-code-dots .dot:nth-child(2) { background: rgba(229, 181, 103, 0.8); }
-.wuji-code-dots .dot:nth-child(3) { background: rgba(56, 217, 192, 0.75); }
+.wuji-code-dots .dot:nth-child(1) { background: rgba(185, 43, 39, 0.78); }
+.wuji-code-dots .dot:nth-child(2) { background: rgba(155, 111, 43, 0.78); }
+.wuji-code-dots .dot:nth-child(3) { background: rgba(43, 100, 105, 0.78); }
 
 .wuji-code-lang {
   margin-left: 0.5rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -399,30 +521,25 @@ html.light .wuji-code-header {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 0.45rem;
+  padding: 0.24rem 0.68rem;
+  border-radius: 0.42rem;
   font-size: 0.74rem;
   font-family: var(--font-sans);
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-html.light .wuji-copy-btn {
-  background: rgba(20, 23, 31, 0.04);
-  border-color: rgba(20, 23, 31, 0.1);
-}
-
 .wuji-copy-btn:hover {
-  color: var(--accent-gold);
-  border-color: rgba(229, 181, 103, 0.45);
+  color: var(--accent-seal);
+  border-color: var(--accent-seal);
 }
 
 .wuji-copy-btn.copied {
   color: var(--accent-jade);
-  border-color: rgba(56, 217, 192, 0.5);
+  border-color: var(--accent-jade);
   background: var(--accent-jade-soft);
 }
 
@@ -431,23 +548,14 @@ html.light .wuji-copy-btn {
   padding: 1.15rem 1.25rem 1.15rem 0 !important;
   overflow-x: auto;
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 0.87rem;
   line-height: 1.72;
   background: transparent !important;
   counter-reset: wuji-line;
 }
 
-.wuji-code-pre code {
-  display: block;
-  min-width: max-content;
-}
-
-.wuji-code-pre code .line {
-  display: inline-block;
-  width: 100%;
-  padding-right: 1rem;
-}
-
+.wuji-code-pre code { display: block; min-width: max-content; }
+.wuji-code-pre code .line { display: inline-block; width: 100%; padding-right: 1rem; }
 .wuji-code-pre code .line::before {
   counter-increment: wuji-line;
   content: counter(wuji-line);
@@ -455,34 +563,39 @@ html.light .wuji-copy-btn {
   width: 2.75rem;
   margin-right: 1rem;
   text-align: right;
-  color: rgba(130, 145, 170, 0.42);
+  color: rgba(118, 124, 128, 0.45);
   user-select: none;
   font-size: 0.78rem;
 }
 
-/* Shiki dual theme CSS variables */
+/* Shiki dual theme: default light (Xuan Paper), .dark switches to dark ink */
 .astro-code,
 .astro-code span {
-  color: var(--shiki-dark);
-}
-
-html.light .astro-code,
-html.light .astro-code span {
   color: var(--shiki-light);
 }
 
+html.dark .astro-code,
+html.dark .astro-code span {
+  color: var(--shiki-dark);
+}
+
 /* =========================================================
-   KaTeX Math Display & Overflow Polishing
+   KaTeX Math Display
    ========================================================= */
 .katex-display {
   margin: 1.6rem 0 !important;
   padding: 1.25rem 1.5rem;
   overflow-x: auto;
   overflow-y: hidden;
-  background: var(--bg-elevated);
+  background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
-  border-radius: 0.9rem;
+  border-radius: 0.85rem;
   color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+html.dark .katex-display {
+  box-shadow: none;
 }
 
 .katex {
@@ -491,50 +604,47 @@ html.light .astro-code span {
 }
 
 /* =========================================================
-   Callouts (NOTE / TIP / IMPORTANT / WARNING / CAUTION)
+   Callouts
    ========================================================= */
 .wuji-callout {
   margin: 1.65rem 0;
   padding: 1rem 1.25rem;
-  border-radius: 0.9rem;
+  border-radius: 0.8rem;
   border: 1px solid var(--border-hairline);
   border-left-width: 3px;
-  background: var(--bg-elevated);
+  background: var(--bg-surface);
 }
 
 .wuji-callout-title {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   margin-bottom: 0.45rem;
 }
 
-.wuji-callout p {
-  margin: 0.35rem 0 !important;
-  font-size: 0.96rem;
-}
+.wuji-callout p { margin: 0.35rem 0 !important; font-size: 0.96rem; }
 
-.callout-note { border-left-color: #60a5fa; background: rgba(96, 165, 250, 0.07); }
-.callout-note .wuji-callout-title { color: #60a5fa; }
+.callout-note { border-left-color: #3b6d8c; background: rgba(59, 109, 140, 0.07); }
+.callout-note .wuji-callout-title { color: #3b6d8c; }
 
 .callout-tip { border-left-color: var(--accent-jade); background: var(--accent-jade-soft); }
 .callout-tip .wuji-callout-title { color: var(--accent-jade); }
 
-.callout-important { border-left-color: var(--accent-gold); background: var(--accent-gold-soft); }
-.callout-important .wuji-callout-title { color: var(--accent-gold); }
+.callout-important { border-left-color: var(--accent-seal); background: var(--accent-seal-soft); }
+.callout-important .wuji-callout-title { color: var(--accent-seal); }
 
-.callout-warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
-.callout-warning .wuji-callout-title { color: #f59e0b; }
+.callout-warning { border-left-color: var(--accent-amber); background: rgba(155, 111, 43, 0.09); }
+.callout-warning .wuji-callout-title { color: var(--accent-amber); }
 
-.callout-caution { border-left-color: var(--accent-crimson); background: rgba(239, 111, 130, 0.08); }
+.callout-caution { border-left-color: var(--accent-crimson); background: rgba(185, 43, 39, 0.09); }
 .callout-caution .wuji-callout-title { color: var(--accent-crimson); }
 
 /* =========================================================
-   Cinema Video Player Card (Bilibili / YouTube / HTML5)
+   Cinema Video Player Card (水墨影画匣)
    ========================================================= */
 .wuji-video-card {
   margin: 2rem 0;
-  border-radius: 1.1rem;
+  border-radius: 0.95rem;
   overflow: hidden;
   border: 1px solid var(--border-hairline);
   background: var(--bg-surface);
@@ -543,7 +653,7 @@ html.light .astro-code span {
 }
 
 .wuji-video-card:hover {
-  border-color: rgba(229, 181, 103, 0.35);
+  border-color: rgba(185, 43, 39, 0.38);
 }
 
 .wuji-video-bar {
@@ -551,7 +661,7 @@ html.light .astro-code span {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1.1rem;
+  padding: 0.72rem 1.05rem;
   border-bottom: 1px solid var(--border-hairline);
   background: var(--bg-elevated);
 }
@@ -566,34 +676,38 @@ html.light .astro-code span {
 .wuji-video-badge {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
+  border-radius: 0.35rem;
 }
 
 .wuji-video-badge-bili {
-  background: rgba(251, 114, 153, 0.16);
+  background: rgba(217, 68, 108, 0.14);
+  color: #c93b63;
+  border: 1px solid rgba(217, 68, 108, 0.32);
+}
+
+html.dark .wuji-video-badge-bili {
   color: #fb7299;
-  border: 1px solid rgba(251, 114, 153, 0.35);
 }
 
 .wuji-video-badge-yt {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.32);
+  background: var(--accent-seal-soft);
+  color: var(--accent-seal);
+  border: 1px solid rgba(185, 43, 39, 0.3);
 }
 
 .wuji-video-badge-native {
   background: var(--accent-jade-soft);
   color: var(--accent-jade);
-  border: 1px solid rgba(56, 217, 192, 0.32);
+  border: 1px solid rgba(43, 100, 105, 0.3);
 }
 
 .wuji-video-title {
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -606,21 +720,21 @@ html.light .astro-code span {
   color: var(--text-muted) !important;
   text-decoration: none !important;
   padding: 0.22rem 0.55rem;
-  border-radius: 0.45rem;
+  border-radius: 0.4rem;
   border: 1px solid var(--border-hairline);
   transition: all 0.2s ease;
 }
 
 .wuji-video-link:hover {
-  color: var(--accent-gold) !important;
-  border-color: rgba(229, 181, 103, 0.4);
+  color: var(--accent-seal) !important;
+  border-color: var(--accent-seal);
 }
 
 .wuji-video-frame {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #050608;
+  background: #0d1013;
 }
 
 .wuji-video-frame iframe,
@@ -633,40 +747,29 @@ html.light .astro-code span {
   object-fit: contain;
 }
 
-/* Scrollbar refinement */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(118, 124, 128, 0.32); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(185, 43, 39, 0.5); }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(130, 145, 170, 0.28);
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(229, 181, 103, 0.48);
-}
-
-/* Animations */
+/* Keyframes */
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-7px); }
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes mist-drift {
+  0%, 100% { transform: translateX(0px) translateY(0px); }
+  50% { transform: translateX(26px) translateY(-6px); }
 }
 
-.animate-float-slow {
-  animation: float-slow 5.5s ease-in-out infinite;
+@keyframes stamp-pop {
+  0% { transform: scale(1.85) rotate(-14deg); opacity: 0; }
+  65% { transform: scale(0.94) rotate(-6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-7deg); opacity: 1; }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 24s linear infinite;
-}
+.animate-float-slow { animation: float-slow 5.5s ease-in-out infinite; }
+.animate-mist-drift { animation: mist-drift 16s ease-in-out infinite; }
+.animate-stamp-pop { animation: stamp-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards; }

@@ -1,0 +1,131 @@
+---
+title: Transformer 详解（四）：推理加速基石——KV Cache、GQA/MLA 与 FlashAttention 图解
+subtitle: 为什么生成第 1 个字受限于算力，而生成后续每个字却卡死在显存带宽？
+summary: 深度解析大模型自回归推理的 Prefill 与 Decode 两阶段瓶颈，结合 SVG 图解推导 KV Cache 显存公式，横向对比 MHA、MQA、GQA 与 DeepSeek MLA 的显存压缩原理，剖析 FlashAttention 在线 Softmax 分块思想，并附带支持 KV Cache 的 GQA 完整 PyTorch 推理代码。
+pubDate: 2026-11-17
+category: Transformer 原理
+tags:
+  - Transformer
+  - KV-Cache
+  - GQA
+  - FlashAttention
+  - PyTorch
+  - 图解
+featured: false
+pinned: false
+coverTheme: azure-void
+---
+
+import TransformerDiagram from '../../components/articles/TransformerDiagram.astro';
+
+训练一个大模型需要万卡算力，但把模型真正推向百万用户并发服务时，真正的胜负手在于**推理效率**。理解 **KV Cache、GQA/MLA 与 FlashAttention**，是从「会调 API」进阶到「懂大模型系统工程」的分水岭。
+
+## 一、Prefill 与 Decode：推理的两个截然不同的世界
+
+自回归生成每吐出一个新 Token，都会经历两个计算特性完全相反的阶段：
+
+<TransformerDiagram
+  variant="kvcache"
+  caption="图 1：大模型推理的 Prefill（算力密集）与 Decode（访存密集）两阶段数据流图解"
+/>
+
+如果不使用 KV Cache，生成第 $t$ 个 Token 时必须把前面 $t - 1$ 个 Token 的 $K, V$ 全部重算一遍，总计算量退化为 $O(T^3)$；引入 KV Cache 后，每步只需算新 Token 的 $q_t, k_t, v_t$ 并拼接到历史缓存中，总计算量降至 $O(T^2)$。
+
+## 二、KV Cache 到底吃掉多少显存？
+
+对于一个 $L$ 层、KV 头数为 $H_{kv}$、单头维度为 $d_k$、批量大小为 $B$、序列长度为 $S$、使用 BF16/FP16（2 字节）存储的模型，KV Cache 显存占用为：
+
+$$
+\text{VRAM}_{\text{KV}} = 2_{\text{(K与V)}} \times 2_{\text{(FP16字节)}} \times L \times H_{kv} \times d_k \times B \times S
+$$
+
+算一笔惊人的账：如果一个 70B 级模型仍用传统 MHA（$L = 80, H_{kv} = 64, d_k = 128$），在 128K 上下文下，**仅仅 1 个用户的 KV Cache 就会吃掉 320 GB 显存**（比模型权重本身还大 2 倍多）！
+
+## 三、压缩 KV Cache 的架构演进：MHA → MQA → GQA → MLA
+
+为了把这头显存巨兽关进笼子，注意力架构经历了四代演进：
+
+| 架构 | KV 头数 | 相对 MHA 的 KV 显存 | 代表模型 | 工程权衡 |
+| --- | --- | --- | --- | --- |
+| **MHA**（多头注意力） | $H_{kv} = H_q$ | $100\%$ | GPT-2 / 早期 LLaMA-1 | 表达力强，长上下文推理显存爆炸 |
+| **MQA**（多查询注意力） | $H_{kv} = 1$ | $1 / H_q$（极省） | PaLM / StarCoder | 显存最省，但多任务质量有一定折损 |
+| **GQA**（分组查询注意力） | $H_{kv} = H_q / g$ | $1 / g$（常见降 8×） | LLaMA 3 / Qwen / Gemini | **当前行业主流平衡点**，几乎无损且省 8 倍显存 |
+| **MLA**（多头潜在注意力） | 低秩联合压缩潜向量 $c_t^{KV}$ | 仅约 $5\% \sim 10\%$ | DeepSeek V3 / V4 系列 | 推理时权重吸收，极致压低长文显存 |
+
+## 四、FlashAttention：为什么把 $O(T^2)$ 显存打到了 $O(T)$？
+
+标准注意力的致命瓶颈不在于乘法次数，而在于**把庞大的 $T \times T$ 注意力矩阵反复写回慢速 HBM 显存再读出来**（I/O 瓶颈）。
+
+**FlashAttention** 的核心洞见只有两句话：
+
+1. **分块计算（Tiling）**：把 $Q, K, V$ 切成小块加载进 GPU 极高速的片上 **SRAM**，在 SRAM 内一次性完成 `MatMul → Mask → Softmax → 乘 V`，**永远不在 HBM 中实例化完整的 $T \times T$ 矩阵**；
+2. **在线 Softmax（Online Softmax）**：利用局部最大值递推修正归一化分母，逐块更新输出累加器，数学结果与标准 Softmax **严格等价**，显存复杂度从 $O(T^2)$ 降至 $O(T)$，训练与 Prefill 速度普遍提升 **2× – 4×**。
+
+## 五、完整 PyTorch 实现：支持 KV Cache 的分组查询注意力（GQA）
+
+下面的实现可直接用于自回归推理循环：第一步传入完整 Prompt（Prefill），后续每步只传入 1 个新 Token（Decode），并复用不断增长的 `kv_cache`：
+
+```python
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class GroupedQueryAttentionWithCache(nn.Module):
+    def __init__(self, d_model: int = 512, n_q_heads: int = 8, n_kv_heads: int = 2):
+        super().__init__()
+        assert n_q_heads % n_kv_heads == 0
+        self.n_q_heads = n_q_heads
+        self.n_kv_heads = n_kv_heads
+        self.group_size = n_q_heads // n_kv_heads
+        self.head_dim = d_model // n_q_heads
+
+        self.wq = nn.Linear(d_model, n_q_heads * self.head_dim, bias=False)
+        self.wk = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wv = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wo = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        kv_cache: tuple[torch.Tensor, torch.Tensor] | None = None,
+    ) -> tuple[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+        B, T, _ = x.shape
+
+        # 1. 仅对当前输入的 T 个 Token 做 Q/K/V 投影
+        q = self.wq(x).view(B, T, self.n_q_heads, self.head_dim).transpose(1, 2)
+        k = self.wk(x).view(B, T, self.n_kv_heads, self.head_dim).transpose(1, 2)
+        v = self.wv(x).view(B, T, self.n_kv_heads, self.head_dim).transpose(1, 2)
+
+        # 2. 拼接历史 KV Cache（Decode 阶段 T=1，缓存长度不断累加）
+        if kv_cache is not None:
+            prev_k, prev_v = kv_cache
+            k = torch.cat([prev_k, k], dim=2)
+            v = torch.cat([prev_v, v], dim=2)
+        new_cache = (k, v)
+
+        # 3. 将 KV 头按分组广播以对齐 Q 头数 -> [B, n_q_heads, S, head_dim]
+        k_exp = k.repeat_interleave(self.group_size, dim=1)
+        v_exp = v.repeat_interleave(self.group_size, dim=1)
+
+        # 4. Prefill 时开启因果掩码；Decode 单 Token 时可见全部历史缓存
+        is_causal = kv_cache is None and T > 1
+        out = F.scaled_dot_product_attention(q, k_exp, v_exp, is_causal=is_causal)
+        out = out.transpose(1, 2).contiguous().view(B, T, -1)
+        return self.wo(out), new_cache
+
+if __name__ == "__main__":
+    gqa = GroupedQueryAttentionWithCache(d_model=512, n_q_heads=8, n_kv_heads=2)
+    # 阶段一 Prefill: 一次性输入 16 个 Prompt Token
+    prompt = torch.randn(1, 16, 512)
+    out_prefill, cache = gqa(prompt, kv_cache=None)
+    print("Prefill 输出:", out_prefill.shape, "| Cache K:", cache[0].shape)
+
+    # 阶段二 Decode: 逐 Token 生成 3 步
+    for step in range(1, 4):
+        next_tok = torch.randn(1, 1, 512)
+        out_step, cache = gqa(next_tok, kv_cache=cache)
+        print(f"Decode 第 {step} 步输出: {out_step.shape} | Cache K 长度: {cache[0].shape[2]}")
+```
+
+至此，**Transformer 详解四部曲**圆满收官：从注意力几何直觉、RoPE 复平面旋转、SwiGLU 现代模块，到 KV Cache 与 FlashAttention 推理底层，你已经掌握了看懂当代任何前沿大语言模型技术报告的完整地图。

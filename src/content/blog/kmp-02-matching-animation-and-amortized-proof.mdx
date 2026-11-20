@@ -1,0 +1,122 @@
+---
+title: KMP 算法详解（二）：匹配过程动画演练、势能法复杂度证明与边界陷阱
+subtitle: 为什么内层套了 while 循环，总时间复杂度依然严格是线性 O(n + m)？
+summary: 通过可交互的 KMP 滑动匹配动画直观对比 KMP 与朴素暴力法的比较次数，运用势能法给出 O(n + m) 均摊复杂度的严谨数学证明，并系统梳理 next 数组三种流派、重叠匹配以及 nextval 常数级优化。
+pubDate: 2026-11-19
+category: 算法精研
+tags:
+  - KMP
+  - 字符串算法
+  - 交互动画
+  - 复杂度证明
+featured: true
+pinned: false
+coverTheme: jade-nebula
+---
+
+import KmpMatchAnimator from '../../components/articles/KmpMatchAnimator.astro';
+
+在[上一篇](/blog/kmp-01-intuition-and-prefix-function/)中，我们已经能够线性构建任意模式串的前缀函数 $\pi$。现在把模式串 $P$ 放到主串 $T$ 上滑动——你会发现，**匹配阶段的代码与构造 $\pi$ 数组的代码几乎一模一样**。
+
+## 一、KMP 文本匹配交互动画（实时对比暴力法）
+
+试试点击下方演示中的 **「最坏退化对比」** 或 **「重叠多命中」**，或者输入自定义字符串，重点观察两件事：
+
+1. 主串下标 `i` **永远只向前走，一步都不回退**（这意味着 KMP 天然支持流式读取超长文件！）；
+2. 每次失配时，模式串直接整体向右滑移 $j - \pi[j-1]$ 位，顶部计数器会实时对比 KMP 与暴力法的字符比较总次数。
+
+<KmpMatchAnimator defaultText="ABABDABACDABABCABAB" defaultPattern="ABABCABAB" />
+
+## 二、如何用势能法证明总复杂度严格为 $O(n + m)$？
+
+很多初学者看到 `for` 循环里套着一个 `while (j > 0 && ...)`，直觉上会担心最坏情况下会不会退化成 $O(nm)$。下面我们用**摊还分析中的势能法（Potential Method）**给出三行看懂的严格证明。
+
+定义势能函数 $\Phi = j$（即当前已匹配长度），它满足以下两条性质：
+
+1. **非负性**：任何时刻恒有 $\Phi = j \ge 0$，且初始时刻 $\Phi_0 = 0$。
+2. **增量上界**：在 `for` 循环的每一次迭代中，`if (T[i] == P[j]) j++` 至多执行一次，因此全过程中 $j$ 的**总增加量不超过 $n$**。
+3. **回退消耗**：由于 $\pi[j - 1] < j$ 严格成立，内层 `while` 循环每执行一次，$j$ 至少减少 $1$（即 $\Delta \Phi \le -1$）。
+
+因为 $j$ 从 $0$ 出发、始终非负、全过程总共最多加 $n$ 次，所以 `while` 循环在**整个算法运行期间的总执行次数**绝不可能超过 $n$！
+
+$$
+\#(\text{while 回退总次数}) \le \#(\text{j 自增总次数}) \le n
+$$
+
+同理，构造前缀数组 $\pi$ 阶段的 `while` 总次数不超过 $m$。因此整个 KMP 算法的时间与空间复杂度严格为：
+
+$$
+T(n, m) = O(n + m), \qquad S(m) = O(m)
+$$
+
+## 三、完整匹配代码（支持查找所有重叠命中）
+
+注意当 `j === m` 找到一次完整匹配时，若希望继续找出所有（包含重叠的）匹配位置，切忌直接写 `j = 0`，而应当写 **`j = pi[j - 1]`**！例如在 `"ABABABA"` 中找 `"ABA"`，位置 `0, 2, 4` 都是合法答案。
+
+```python
+def kmp_search_all(text: str, pattern: str) -> list[int]:
+    if not pattern:
+        return []
+    m = len(pattern)
+    # 1. 预处理前缀函数 π
+    pi = [0] * m
+    j = 0
+    for i in range(1, m):
+        while j > 0 and pattern[i] != pattern[j]:
+            j = pi[j - 1]
+        if pattern[i] == pattern[j]:
+            j += 1
+        pi[i] = j
+
+    # 2. 在线扫描主串 text
+    matches: list[int] = []
+    j = 0
+    for i, ch in enumerate(text):
+        while j > 0 and ch != pattern[j]:
+            j = pi[j - 1]
+        if ch == pattern[j]:
+            j += 1
+            if j == m:
+                matches.append(i - m + 1)
+                j = pi[j - 1]  # 关键：保留最长 Border 以支持重叠匹配
+    return matches
+
+print(kmp_search_all("ABABABABABA", "ABABA"))  # [0, 2, 4, 6]
+```
+
+## 四、避坑指南：`next` 数组的三种常见流派对照
+
+不同教材和题解里的 `next` 数组经常差 1 位，导致面试时极易混乱。以 `P = "ABABACA"` 为例，把三种写法并排对照就能彻底免疫：
+
+| 写法流派 | 下标基准 | `P = "ABABACA"` 的数组值 | 失配转移方式 | 推荐场景 |
+| --- | --- | --- | --- | --- |
+| **前缀函数 $\pi$**（本文采用） | 0-based | `[0, 0, 1, 2, 3, 0, 1]` | `j = pi[j - 1]`（当 `j > 0`） | 工程开发、LeetCode、竞赛首选 |
+| **右移补 `-1` 版 `next`** | 0-based | `[-1, 0, 0, 1, 2, 3, 0]` | `j = next[j]`（统一处理首字符） | 部分严蔚敏/经典教材 |
+| **1-based `next`** | 1-based | `[0, 1, 1, 2, 3, 4, 1]` | `j = next[j]` | 考研 408 手算题 |
+
+## 五、进阶常数优化：`nextval`（消除多余的连续失配）
+
+观察 `P = "AAAAB"`：当在 `P[3] = 'A'` 处与主串字符 `'C'` 失配时，标准 KMP 会先退到 `P[2] = 'A'`，再退到 `P[1] = 'A'`，再退到 `P[0] = 'A'`——明知这几个位置都是 `'A'`，却连跳三次才停下。
+
+**`nextval` 优化**的思想很简单：在构造跳转表时，如果跳转目标字符 `P[k]` 与当前字符 `P[j]` 完全相同，就直接**路径压缩**到 `nextval[k]`，保证任意一次失配后跳转到的一定是不同字符，从而将单步最坏回退压到极致：
+
+```cpp
+std::vector<int> build_nextval(const std::string& p) {
+    int m = static_cast<int>(p.size());
+    std::vector<int> next(m, -1);
+    for (int i = 1, j = -1; i < m; ++i) {
+        while (j >= 0 && p[i - 1] != p[j]) j = next[j];
+        next[i] = ++j;
+    }
+    std::vector<int> nextval = next;
+    for (int i = 1; i < m; ++i) {
+        if (next[i] >= 0 && p[i] == p[next[i]]) {
+            nextval[i] = nextval[next[i]];
+        }
+    }
+    return nextval;
+}
+```
+
+> [!NOTE] 什么时候不能用 `nextval`？
+> `nextval` 破坏了原 $\pi$ 数组中「每个前缀的最长 Border 长度」这一结构信息。如果你需要求字符串的最小周期、统计前缀出现次数或构建前缀自动机，请务必保留原始的 $\pi$ 数组。

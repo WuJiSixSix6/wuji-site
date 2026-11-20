@@ -1,0 +1,266 @@
+---
+/**
+ * Interactive KMP Prefix Function (next / π) Step-by-Step Animator
+ * Styled in our Song-dynasty Xuan paper & antique cinnabar ink-wash aesthetic.
+ */
+interface Props {
+  defaultPattern?: string;
+}
+const { defaultPattern = 'ABABACA' } = Astro.props;
+const uid = `kmp-pi-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class="wuji-kmp-widget my-8 p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] rounded-[3px]"
+  data-kmp-prefix-widget={uid}
+  data-default-pattern={defaultPattern}
+>
+  <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border-hairline)]">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="wuji-seal px-1.5 py-0.5 text-[10px]">演示</span>
+        <span class="text-sm font-bold font-editorial text-[var(--text-primary)]">
+          前缀函数 π（next 数组）构造动画
+        </span>
+      </div>
+      <p class="text-xs text-[var(--text-muted)] mt-1">
+        逐步观察指针 <code class="font-mono">i</code> 与最长相等真前后缀长度 <code class="font-mono">j</code> 的回退与递推过程
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <button type="button" data-preset="ABABACA" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">ABABACA</button>
+      <button type="button" data-preset="AABAABAAA" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">AABAABAAA</button>
+      <button type="button" data-preset="ABCDABD" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">ABCDABD</button>
+    </div>
+  </div>
+
+  <!-- Custom Pattern Input & Playback Controls -->
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <label class="text-xs text-[var(--text-muted)]" for={`${uid}-input`}>模式串 P:</label>
+      <input
+        id={`${uid}-input`}
+        data-pattern-input
+        type="text"
+        maxlength="16"
+        value={defaultPattern}
+        class="w-40 px-2.5 py-1 text-xs font-mono tracking-widest uppercase bg-[var(--bg-canvas)] border border-[var(--border-strong)] rounded-[2px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-seal)]"
+      />
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <button type="button" data-btn="prev" class="px-2.5 py-1 border border-[var(--border-hairline)] rounded-[2px] text-[var(--text-secondary)] hover:border-[var(--border-strong)] cursor-pointer">← 上一步</button>
+      <button type="button" data-btn="play" class="px-3 py-1 bg-[var(--ink-primary)] text-[var(--bg-canvas)] rounded-[2px] cursor-pointer">▶ 自动播放</button>
+      <button type="button" data-btn="next" class="px-2.5 py-1 border border-[var(--border-hairline)] rounded-[2px] text-[var(--text-secondary)] hover:border-[var(--border-strong)] cursor-pointer">下一步 →</button>
+      <button type="button" data-btn="reset" class="px-2.5 py-1 text-[var(--text-muted)] hover:text-[var(--accent-seal)] cursor-pointer">重置</button>
+    </div>
+  </div>
+
+  <!-- Animated Array Visualization -->
+  <div class="mt-6 overflow-x-auto pb-2">
+    <div data-cells class="inline-flex flex-col gap-2 min-w-max"></div>
+  </div>
+
+  <!-- Step Narration & Progress -->
+  <div class="mt-4 pt-3.5 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+    <p data-narration class="text-[var(--text-primary)] leading-relaxed font-editorial"></p>
+    <span data-step-counter class="font-mono text-[var(--text-muted)] shrink-0"></span>
+  </div>
+</div>
+
+<script>
+  interface PiStep {
+    i: number;
+    j: number;
+    pi: (number | null)[];
+    status: 'init' | 'compare' | 'match' | 'fallback' | 'set';
+    note: string;
+  }
+
+  function buildPrefixSteps(pattern: string): PiStep[] {
+    const m = pattern.length;
+    const pi: (number | null)[] = Array(m).fill(null);
+    const steps: PiStep[] = [];
+    if (m === 0) return steps;
+
+    pi[0] = 0;
+    steps.push({
+      i: 0,
+      j: 0,
+      pi: [...pi],
+      status: 'init',
+      note: '初始化：单字符子串没有真前后缀，故 π[0] = 0，随后令 i 从 1 开始扫描。',
+    });
+
+    let j = 0;
+    for (let i = 1; i < m; i++) {
+      steps.push({
+        i,
+        j,
+        pi: [...pi],
+        status: 'compare',
+        note: `考察位置 i=${i}（字符 '${pattern[i]}'），与前缀末尾 j=${j}（字符 '${pattern[j]}'）比较。`,
+      });
+
+      while (j > 0 && pattern[i] !== pattern[j]) {
+        const nextJ = pi[j - 1] ?? 0;
+        steps.push({
+          i,
+          j,
+          pi: [...pi],
+          status: 'fallback',
+          note: `失配：P[${i}]='${pattern[i]}' ≠ P[${j}]='${pattern[j]}'，利用已算出的次长真前后缀，将 j 从 ${j} 回退到 π[${j - 1}] = ${nextJ}。`,
+        });
+        j = nextJ;
+      }
+
+      if (pattern[i] === pattern[j]) {
+        j++;
+        pi[i] = j;
+        steps.push({
+          i,
+          j,
+          pi: [...pi],
+          status: 'match',
+          note: `匹配成功！P[${i}] = P[${j - 1}] = '${pattern[i]}'，最长真前后缀延长为 ${j}，记录 π[${i}] = ${j}。`,
+        });
+      } else {
+        pi[i] = 0;
+        steps.push({
+          i,
+          j: 0,
+          pi: [...pi],
+          status: 'set',
+          note: `j 已退至 0 且 P[${i}]='${pattern[i]}' ≠ P[0]='${pattern[0]}'，无公共真前后缀，记录 π[${i}] = 0。`,
+        });
+      }
+    }
+
+    steps.push({
+      i: m - 1,
+      j,
+      pi: [...pi],
+      status: 'set',
+      note: `构造完成！最终前缀数组 π = [${pi.join(', ')}]，总耗时严格 O(m)。`,
+    });
+    return steps;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-kmp-prefix-widget]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('[data-pattern-input]')!;
+    const cellsEl = root.querySelector<HTMLElement>('[data-cells]')!;
+    const narrationEl = root.querySelector<HTMLElement>('[data-narration]')!;
+    const counterEl = root.querySelector<HTMLElement>('[data-step-counter]')!;
+    const playBtn = root.querySelector<HTMLButtonElement>('[data-btn="play"]')!;
+
+    let pattern = (input.value || 'ABABACA').toUpperCase().replace(/\s+/g, '');
+    let steps = buildPrefixSteps(pattern);
+    let idx = 0;
+    let timer: number | null = null;
+
+    function stopPlay() {
+      if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+      }
+      playBtn.textContent = '▶ 自动播放';
+    }
+
+    function render() {
+      const step = steps[idx];
+      if (!step) return;
+      const m = pattern.length;
+
+      let ptrRow = '<div class="flex items-center gap-1.5"><span class="w-12 text-[11px] font-mono text-[var(--text-muted)]">指针</span>';
+      let idxRow = '<div class="flex items-center gap-1.5"><span class="w-12 text-[11px] font-mono text-[var(--text-muted)]">下标</span>';
+      let charRow = '<div class="flex items-center gap-1.5"><span class="w-12 text-[11px] font-mono text-[var(--text-muted)]">P[k]</span>';
+      let piRow = '<div class="flex items-center gap-1.5"><span class="w-12 text-[11px] font-mono text-[var(--text-muted)]">π[k]</span>';
+
+      for (let k = 0; k < m; k++) {
+        const isI = k === step.i;
+        const isJ = k === step.j && step.status !== 'init';
+        const ptrLabel = isI && isJ ? 'i,j' : isI ? 'i' : isJ ? 'j' : '';
+        ptrRow += `<span class="w-9 text-center text-[11px] font-mono font-bold ${isI ? 'text-[var(--accent-seal)]' : 'text-[var(--accent-jade)]'}">${ptrLabel}</span>`;
+        idxRow += `<span class="w-9 text-center text-[10px] font-mono text-[var(--text-muted)]">${k}</span>`;
+
+        // Highlight active prefix & suffix spans on match
+        const inMatchedPrefix = step.status === 'match' && k < step.j;
+        const inMatchedSuffix = step.status === 'match' && k > step.i - step.j && k <= step.i;
+        let boxCls = 'border-[var(--border-hairline)] bg-[var(--bg-canvas)] text-[var(--text-primary)]';
+        if (step.status === 'fallback' && (isI || isJ)) {
+          boxCls = 'border-[var(--accent-seal)] bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] font-bold';
+        } else if (inMatchedPrefix || inMatchedSuffix) {
+          boxCls = 'border-[var(--accent-jade)] bg-[var(--accent-jade-soft)] text-[var(--text-primary)] font-bold';
+        } else if (isI || isJ) {
+          boxCls = 'border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] font-bold';
+        }
+
+        charRow += `<span class="w-9 h-9 inline-flex items-center justify-center font-mono text-sm border rounded-[2px] transition-colors ${boxCls}">${pattern[k]}</span>`;
+
+        const pv = step.pi[k];
+        const piCls =
+          k === step.i && (step.status === 'match' || step.status === 'set')
+            ? 'border-[var(--accent-seal)] bg-[var(--accent-seal)] text-[#f6f1e7] font-bold'
+            : 'border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-secondary)]';
+        piRow += `<span class="w-9 h-8 inline-flex items-center justify-center font-mono text-xs border rounded-[2px] transition-colors ${piCls}">${pv === null ? '·' : pv}</span>`;
+      }
+
+      ptrRow += '</div>';
+      idxRow += '</div>';
+      charRow += '</div>';
+      piRow += '</div>';
+
+      cellsEl.innerHTML = ptrRow + idxRow + charRow + piRow;
+      narrationEl.textContent = step.note;
+      counterEl.textContent = `步骤 ${idx + 1} / ${steps.length}`;
+    }
+
+    function reload(newPat: string) {
+      stopPlay();
+      const cleaned = newPat.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+      pattern = cleaned || 'ABABACA';
+      input.value = pattern;
+      steps = buildPrefixSteps(pattern);
+      idx = 0;
+      render();
+    }
+
+    root.querySelector('[data-btn="prev"]')?.addEventListener('click', () => {
+      stopPlay();
+      if (idx > 0) { idx--; render(); }
+    });
+    root.querySelector('[data-btn="next"]')?.addEventListener('click', () => {
+      stopPlay();
+      if (idx < steps.length - 1) { idx++; render(); }
+    });
+    root.querySelector('[data-btn="reset"]')?.addEventListener('click', () => {
+      stopPlay();
+      idx = 0;
+      render();
+    });
+    playBtn.addEventListener('click', () => {
+      if (timer !== null) {
+        stopPlay();
+        return;
+      }
+      if (idx >= steps.length - 1) idx = 0;
+      playBtn.textContent = '⏸ 暂停';
+      timer = window.setInterval(() => {
+        if (idx < steps.length - 1) {
+          idx++;
+          render();
+        } else {
+          stopPlay();
+        }
+      }, 950);
+    });
+
+    input.addEventListener('change', () => reload(input.value));
+    root.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((btn) => {
+      btn.addEventListener('click', () => reload(btn.dataset.preset || 'ABABACA'));
+    });
+
+    render();
+  });
+</script>

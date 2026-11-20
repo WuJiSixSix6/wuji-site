@@ -1,0 +1,128 @@
+---
+title: Transformer 详解（二）：从正弦位置编码到旋转位置编码 RoPE 数学图解
+subtitle: 为什么复平面上的旋转，成了现代百万上下文大模型的统一位置语言？
+summary: 从自注意力的置换等变性出发，系统对比绝对正弦位置编码与旋转位置编码（RoPE）的本质差异；结合复平面几何图解与严格内积推导，证明 RoPE 如何用绝对操作自然表达相对距离 m - n，并附完整 PyTorch 工程实现与 NTK/YaRN 长文本外推原理解析。
+pubDate: 2026-11-16
+category: Transformer 原理
+tags:
+  - Transformer
+  - RoPE
+  - 位置编码
+  - PyTorch
+  - 图解
+featured: false
+pinned: false
+coverTheme: jade-nebula
+---
+
+import TransformerDiagram from '../../components/articles/TransformerDiagram.astro';
+
+如果你把「我 吃 苹果」和「苹果 吃 我」这两句话直接送进上一篇写好的纯自注意力层，你会发现一个致命问题：**在不加任何位置信息时，Self-Attention 对输入顺序完全不敏感（置换等变性）**——它把句子当成了一袋无序的词（Bag of Words）。
+
+如何优雅地把「顺序」与「相对距离」注入矩阵乘法，决定了大模型能否在百万 Token 长文档中精准定位细节。
+
+## 一、初代方案：2017 正弦余弦绝对位置编码
+
+原始 Transformer 论文为每个位置 $pos$ 和维度 $2i, 2i+1$ 构造了固定的正弦波向量，并直接**加**到词向量上：
+
+$$
+PE_{(pos,\,2i)} = \sin\!\left(\frac{pos}{10000^{2i / d_{\text{model}}}}\right), \qquad
+PE_{(pos,\,2i+1)} = \cos\!\left(\frac{pos}{10000^{2i / d_{\text{model}}}}\right)
+$$
+
+它的设计非常巧妙：借助三角和差公式，$PE_{pos + k}$ 可以写成 $PE_{pos}$ 的线性旋转变换。但它的致命短板在于：
+
+1. **加性干扰**：$X + PE$ 经过 $W_Q, W_K$ 投影并做点积后，会产生语义与位置的交叉干扰项；
+2. **外推崩塌**：训练长度若为 4K，推理时输入 16K 序列，模型从未见过高位置相位组合，困惑度（PPL）会断崖式恶化。
+
+## 二、现代统一标准：旋转位置编码（RoPE）几何图解
+
+苏剑林老师提出的 **RoPE（Rotary Position Embedding）** 彻底换了一个维度思考问题：
+
+> **不要把位置「加」在词向量上，而是把位置当成旋转角，直接「旋转」Query 和 Key 向量！**
+
+<TransformerDiagram
+  variant="rope"
+  caption="图 1：RoPE 在二维复平面上的几何直观——内积结果仅取决于相对位置差 (m - n)θ"
+/>
+
+### 复数视角的严谨推导
+
+以一个二维子空间 $(x_0, x_1)$ 为例，将其视作复数 $z = x_0 + i x_1$。对位置 $m$ 的向量 $q$ 乘以旋转因子 $e^{i m \theta}$，对位置 $n$ 的向量 $k$ 乘以 $e^{i n \theta}$：
+
+$$
+f(q, m) = q\, e^{i m \theta}, \qquad f(k, n) = k\, e^{i n \theta}
+$$
+
+计算二者的复内积实部（即二维实向量点积）：
+
+$$
+\langle f(q, m), f(k, n) \rangle = \text{Re}\!\left[ (q e^{i m \theta})(k e^{i n \theta})^* \right] = \text{Re}\!\left[ q k^* \, e^{i (m - n) \theta} \right]
+$$
+
+写成 $2 \times 2$ 实旋转矩阵形式，对 $d$ 维向量分组为 $d/2$ 对，每对频率 $\theta_i = \text{base}^{-2i/d}$：
+
+$$
+\begin{pmatrix} \cos m\theta_i & -\sin m\theta_i \\ \sin m\theta_i & \cos m\theta_i \end{pmatrix}
+\begin{pmatrix} x_{2i} \\ x_{2i+1} \end{pmatrix}
+=
+\begin{pmatrix} x_{2i}\cos m\theta_i - x_{2i+1}\sin m\theta_i \\ x_{2i}\sin m\theta_i + x_{2i+1}\cos m\theta_i \end{pmatrix}
+$$
+
+这个公式美妙到令人拍案叫绝：**前向计算只需要知道每个 Token 自己的绝对位置 $m$（完美兼容 KV Cache），而注意力点积却自动只依赖相对距离 $m - n$！**
+
+## 三、高效 PyTorch 实现（无需构造稀疏大矩阵）
+
+在工程上，绝不需要构造 $d \times d$ 的分块对角旋转矩阵，只需用一次 `rotate_half` 逐元素乘加即可在 $O(d)$ 完成旋转：
+
+```python
+import torch
+
+def precompute_rope_cache(seq_len: int, head_dim: int, base: float = 500_000.0, device=None):
+    """预计算 RoPE 的 cos 和 sin 查表，base=500000 适用于长上下文"""
+    assert head_dim % 2 == 0
+    inv_freq = 1.0 / (base ** (torch.arange(0, head_dim, 2, device=device).float() / head_dim))
+    positions = torch.arange(seq_len, device=device).float()
+    # 外积得到每个位置、每个频率对的旋转角 m * theta_i -> [T, head_dim / 2]
+    freqs = torch.outer(positions, inv_freq)
+    emb = torch.cat([freqs, freqs], dim=-1)  # [T, head_dim]
+    return emb.cos()[None, None, :, :], emb.sin()[None, None, :, :]
+
+def rotate_half(x: torch.Tensor) -> torch.Tensor:
+    """将后半维取反并与前半维交换: (-x2, x1)"""
+    half = x.shape[-1] // 2
+    x1, x2 = x[..., :half], x[..., half:]
+    return torch.cat([-x2, x1], dim=-1)
+
+def apply_rope(q: torch.Tensor, k: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor):
+    """q, k: [B, H, T, head_dim]"""
+    T = q.shape[2]
+    cos_t = cos[:, :, :T, :]
+    sin_t = sin[:, :, :T, :]
+    q_rot = (q * cos_t) + (rotate_half(q) * sin_t)
+    k_rot = (k * cos_t) + (rotate_half(k) * sin_t)
+    return q_rot, k_rot
+
+if __name__ == "__main__":
+    B, H, T, D = 2, 8, 64, 128
+    q = torch.randn(B, H, T, D)
+    k = torch.randn(B, H, T, D)
+    cos, sin = precompute_rope_cache(seq_len=2048, head_dim=D)
+    q_r, k_r = apply_rope(q, k, cos, sin)
+    # 验证相对位置不变性：将 q(pos=10) 与 k(pos=3) 的内积，与 q(pos=40) 与 k(pos=33) 对比
+    q0, k0 = torch.randn(1, 1, 1, D), torch.randn(1, 1, 1, D)
+    dot1 = ((q0 * cos[:, :, 10:11] + rotate_half(q0) * sin[:, :, 10:11]) *
+            (k0 * cos[:, :, 3:4] + rotate_half(k0) * sin[:, :, 3:4])).sum()
+    dot2 = ((q0 * cos[:, :, 40:41] + rotate_half(q0) * sin[:, :, 40:41]) *
+            (k0 * cos[:, :, 33:34] + rotate_half(k0) * sin[:, :, 33:34])).sum()
+    print(f"位置差同为 7 的内积误差: {(dot1 - dot2).abs().item():.2e}")
+```
+
+## 四、如何把上下文窗口外推到 1M Tokens？（ABF 与 YaRN）
+
+现代模型（如 Claude 5.2、Gemini 4、Qwen4-Max）动辄支持 **100 万 Token**，背后离不开对 RoPE 频率基数（`base`）的精细调控：
+
+- **ABF（Adjusted Base Frequency）**：将原始 `base = 10,000` 调大到 `500,000` 甚至 `10,000,000`，放缓低频维度的旋转速率，避免超长距离下相位绕圈混淆；
+- **YaRN（Yet another RoPE extensioN）**：按维度频率分层插值——**高频维度**负责局部语法，不做插值以保持分辨率；**低频维度**负责长程依赖，按缩放比平滑内插，再配合注意力温度缩放，只需少量长文继续训练即可丝滑外推至 1M 窗口。
+
+下一篇，我们将把 RMSNorm、Pre-LN 与 SwiGLU 组装起来，写出一个完整的现代 Decoder 模型：[《Transformer 详解（三）：Pre-LN、RMSNorm、SwiGLU 与现代 LLM 块完整代码实现》](/blog/transformer-03-ffn-swiglu-rmsnorm-and-training/)。

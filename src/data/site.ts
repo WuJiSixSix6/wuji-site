@@ -1,11 +1,11 @@
 export const SITE = {
   name: '无极',
   enName: 'WuJi',
-  title: '无极 · WuJi — 数字花园与技术手记',
+  title: '无极 · WuJi — 算法、大模型与系统架构手记',
   shortTitle: '无极 · WuJi',
   tagline: '无极而太极，极简而深邃。',
   heroSubtitle:
-    '在这里记录软件架构、数学之美、AI 算法与前端美学的深度思考。以代码筑器，以文字载道。',
+    '专注算法底层推导、Transformer 架构剖析与前沿大模型演进观察。以代码筑器，以文字载道。',
   author: '无极 (WuJi)',
   githubUrl: 'https://github.com/WuJiSixSix6',
   repoUrl: 'https://github.com/WuJiSixSix6/wuji-site',
@@ -27,35 +27,23 @@ export const CATEGORY_META: Record<
   string,
   { en: string; desc: string; accent: string; glyph: string }
 > = {
-  工程实践: {
-    en: 'Engineering',
-    desc: '现代前端渲染、架构设计、性能优化与高可靠性系统落地。',
+  算法精研: {
+    en: 'Algorithms',
+    desc: 'KMP 字符串匹配、前缀函数自动机与经典算法的可视化动画演示与严格证明。',
+    accent: 'seal',
+    glyph: '算',
+  },
+  大模型前沿: {
+    en: 'LLM Frontier',
+    desc: '2026 年 11 月以来全球与国产最新大模型的架构演进、实测横评与工程选型。',
     accent: 'jade',
-    glyph: '⌘',
+    glyph: '智',
   },
-  数学与AI: {
-    en: 'Math & AI',
-    desc: '从直觉到公式，拆解深度学习、信号处理与算法背后的数学原理。',
-    accent: 'gold',
-    glyph: '∑',
-  },
-  体系构建: {
-    en: 'DevOps & Craft',
-    desc: 'CI/CD 自动化、云原生运维、效率工具与数字花园工作流。',
-    accent: 'azure',
-    glyph: '◈',
-  },
-  思考随笔: {
-    en: 'Essays',
-    desc: '关于技术哲学、极简美学、系统复杂性与个体成长的沉淀。',
-    accent: 'crimson',
-    glyph: '◯',
-  },
-  指南文档: {
-    en: 'Guides',
-    desc: '排版规范、Markdown 扩展语法与博客写作功能全览。',
-    accent: 'gold',
-    glyph: '✦',
+  'Transformer 原理': {
+    en: 'Transformer',
+    desc: '从自注意力、RoPE 旋转编码、SwiGLU 到 KV Cache 与 FlashAttention 的图解与 PyTorch 实现。',
+    accent: 'seal',
+    glyph: '构',
   },
 };
 
@@ -64,8 +52,8 @@ export function getCategoryMeta(category: string) {
     CATEGORY_META[category] || {
       en: 'Collection',
       desc: `收录「${category}」主题下的全部技术文章与思考笔记。`,
-      accent: 'gold',
-      glyph: '◇',
+      accent: 'seal',
+      glyph: '卷',
     }
   );
 }

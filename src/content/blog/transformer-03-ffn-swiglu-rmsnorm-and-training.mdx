@@ -1,0 +1,169 @@
+---
+title: Transformer 详解（三）：Pre-LN、RMSNorm、SwiGLU 与现代 LLM 块完整代码实现
+subtitle: 拆解注意力之外占 2/3 参数量的核心组件，亲手用 120 行 PyTorch 组装完整现代语言模型
+summary: 深入解析为何现代大语言模型全面转向 Pre-LN 残差结构、RMSNorm 归一化与 SwiGLU 门控前馈网络，通过梯度流与参数量计算公式讲清每一处工程取舍，并给出可直接运行前向与损失计算的完整 LLaMA 风格 Transformer Decoder 源码。
+pubDate: 2026-11-17
+category: Transformer 原理
+tags:
+  - Transformer
+  - SwiGLU
+  - RMSNorm
+  - PyTorch
+  - LLM架构
+featured: false
+pinned: false
+coverTheme: obsidian-aurora
+---
+
+如果只看论文标题 *Attention Is All You Need*，很容易误以为注意力层占据了全部参数。实际上，在现代大语言模型中，**前馈网络（FFN）占了总参数量的约 2/3**，而归一化与残差连接的位置直接决定了百层深网能否稳定收敛。
+
+## 一、为什么现代大模型全员采用 Pre-LN？
+
+对比两种残差拓扑的反向传播梯度：
+
+- **Post-LN（2017 原版）**：$x_{l+1} = \text{LN}(x_l + F(x_l))$
+  反向传播时，梯度每经过一层都要乘以 LayerNorm 的雅可比矩阵，顶层梯度容易在初始化阶段爆炸，极度依赖精细的 Learning Rate Warmup。
+- **Pre-LN（现代标准）**：$x_{l+1} = x_l + F(\text{LN}(x_l))$
+  展开 $L$ 层后有：
+
+$$
+x_L = x_0 + \sum_{l=0}^{L-1} F_l(\text{LN}(x_l))
+$$
+
+损失函数 $\mathcal{L}$ 对浅层 $x_0$ 的梯度始终保留着一条**直通恒等项** $\frac{\partial \mathcal{L}}{\partial x_L}$，无论网络堆到 80 层还是 128 层，训练初期梯度都极其平稳。
+
+## 二、RMSNorm：删掉均值中心化，速度提升且效果不降
+
+标准 LayerNorm 需要先算均值 $\mu$ 再算方差 $\sigma^2$。研究发现，LayerNorm 真正起作用的是**缩放不变性（Re-scaling）**而非平移不变性（Re-centering）。
+
+**RMSNorm（Root Mean Square Layer Normalization）** 直接去掉减均值操作，仅按均方根缩放：
+
+$$
+\text{RMS}(x) = \sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2 + \varepsilon}, \qquad
+\text{RMSNorm}(x) = \frac{x}{\text{RMS}(x)} \odot \gamma
+$$
+
+它省去了一次全局均值规约（Reduction）与偏置参数 $\beta$，在大规模 GPU 集群上可降低约 10%–30% 的归一化内核开销。
+
+## 三、SwiGLU：从两矩阵到三矩阵的门控知识记忆库
+
+传统 FFN 形式为 $\text{ReLU}(x W_1) W_2$，中间隐藏层维度通常为 $4d$。现代 LLM（LLaMA、Qwen、DeepSeek、Gemma 等）统一采用 **SwiGLU** 门控结构：
+
+$$
+\text{SwiGLU}(x) = \Big(\text{SiLU}(x W_{\text{gate}}) \odot (x W_{\text{up}})\Big) W_{\text{down}}
+$$
+
+其中 $\text{SiLU}(z) = z \cdot \sigma(z)$。为了使三个矩阵的总参数量与传统两矩阵 $4d \times 2 = 8d^2$ 保持一致，隐藏维度通常取：
+
+$$
+d_{\text{ff}} = \frac{2}{3} \times 4d = \frac{8}{3} d \quad (\text{并向上对齐至 } 128 \text{ 或 } 256 \text{ 的倍数})
+$$
+
+> [!NOTE] FFN 的直觉意义：键值记忆库
+> 学术界多项可解释性研究表明，Self-Attention 负责在**上下文 Token 之间搬运与路由信息**，而 SwiGLU FFN 则扮演着**参数化事实知识库**的角色——`W_gate` 与 `W_up` 匹配激活模式，`W_down` 读取对应的知识向量。
+
+## 四、完整可运行代码：120 行组装现代 Transformer 语言模型
+
+下面把前两篇的 **RMSNorm + 因果多头注意力 + RoPE + SwiGLU + Weight Tying（词表权重共享）** 完整组装成一个端到端可训练的现代 Decoder-Only 模型：
+
+```python
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        norm = torch.rsqrt(x.pow(2).mean(dim=-1, keepdim=True) + self.eps)
+        return x * norm * self.weight
+
+class SwiGLUFFN(nn.Module):
+    def __init__(self, d_model: int, hidden_dim: int):
+        super().__init__()
+        self.w_gate = nn.Linear(d_model, hidden_dim, bias=False)
+        self.w_up = nn.Linear(d_model, hidden_dim, bias=False)
+        self.w_down = nn.Linear(hidden_dim, d_model, bias=False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.w_down(F.silu(self.w_gate(x)) * self.w_up(x))
+
+def rotate_half(x: torch.Tensor) -> torch.Tensor:
+    h = x.shape[-1] // 2
+    return torch.cat([-x[..., h:], x[..., :h]], dim=-1)
+
+class ModernAttention(nn.Module):
+    def __init__(self, d_model: int, n_heads: int):
+        super().__init__()
+        self.n_heads = n_heads
+        self.head_dim = d_model // n_heads
+        self.qkv = nn.Linear(d_model, 3 * d_model, bias=False)
+        self.wo = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(self, x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
+        B, T, C = x.shape
+        q, k, v = self.qkv(x).view(B, T, 3, self.n_heads, self.head_dim).unbind(dim=2)
+        q, k, v = q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)
+
+        # 施加 RoPE 旋转位置编码
+        q = q * cos[:, :, :T] + rotate_half(q) * sin[:, :, :T]
+        k = k * cos[:, :, :T] + rotate_half(k) * sin[:, :, :T]
+
+        # PyTorch 2.x 原生 FlashAttention / SDPA
+        out = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        return self.wo(out.transpose(1, 2).contiguous().view(B, T, C))
+
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model: int, n_heads: int, ffn_dim: int):
+        super().__init__()
+        self.norm1 = RMSNorm(d_model)
+        self.attn = ModernAttention(d_model, n_heads)
+        self.norm2 = RMSNorm(d_model)
+        self.ffn = SwiGLUFFN(d_model, ffn_dim)
+
+    def forward(self, x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
+        x = x + self.attn(self.norm1(x), cos, sin)  # Pre-LN 残差高速公路 1
+        x = x + self.ffn(self.norm2(x))             # Pre-LN 残差高速公路 2
+        return x
+
+class ModernTransformerLM(nn.Module):
+    def __init__(self, vocab_size: int = 32000, d_model: int = 512, n_layers: int = 6, n_heads: int = 8, max_len: int = 2048):
+        super().__init__()
+        self.tok_emb = nn.Embedding(vocab_size, d_model)
+        ffn_dim = int(8 * d_model / 3)
+        ffn_dim = ((ffn_dim + 63) // 64) * 64  # 对齐至 64 倍数以利 TensorCore
+        self.blocks = nn.ModuleList([TransformerBlock(d_model, n_heads, ffn_dim) for _ in range(n_layers)])
+        self.final_norm = RMSNorm(d_model)
+        self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
+        # 输入输出词表权重共享（Weight Tying）
+        self.lm_head.weight = self.tok_emb.weight
+
+        head_dim = d_model // n_heads
+        inv_freq = 1.0 / (500_000.0 ** (torch.arange(0, head_dim, 2).float() / head_dim))
+        freqs = torch.outer(torch.arange(max_len).float(), inv_freq)
+        emb = torch.cat([freqs, freqs], dim=-1)
+        self.register_buffer("rope_cos", emb.cos()[None, None, :, :], persistent=False)
+        self.register_buffer("rope_sin", emb.sin()[None, None, :, :], persistent=False)
+
+    def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None):
+        x = self.tok_emb(idx)
+        for block in self.blocks:
+            x = block(x, self.rope_cos, self.rope_sin)
+        logits = self.lm_head(self.final_norm(x))
+        loss = None
+        if targets is not None:
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+        return logits, loss
+
+if __name__ == "__main__":
+    model = ModernTransformerLM()
+    tokens = torch.randint(0, 32000, (2, 64))
+    logits, loss = model(tokens, targets=tokens)
+    print(f"参数量: {sum(p.numel() for p in model.parameters()) / 1e6:.2f}M | logits: {logits.shape} | loss: {loss.item():.4f}")
+```
+
+最后一篇我们将进入大模型推理部署的核心战场：[《Transformer 详解（四）：推理加速基石——KV Cache、GQA/MLA 与 FlashAttention 图解》](/blog/transformer-04-kv-cache-gqa-and-flashattention/)。

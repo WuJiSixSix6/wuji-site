@@ -1,0 +1,144 @@
+---
+title: Transformer 详解（一）：全景架构图解与缩放点积注意力机制
+subtitle: 从 2017 年原始论文到 2026 年现代大语言模型，一张图彻底看清张量维度流与 QKV 数学直觉
+summary: 系统拆解 Transformer 从经典 Post-LN 到现代 Pre-LN/RMSNorm/RoPE/SwiGLU 的架构演进图解，推导缩放点积注意力与 1/√d_k 方差归一化的数学原因，附完整张量维度流图示、B 站经典可视化讲解与 PyTorch 多头自注意力源码实现。
+pubDate: 2026-11-15
+category: Transformer 原理
+tags:
+  - Transformer
+  - Self-Attention
+  - PyTorch
+  - 图解
+featured: true
+pinned: false
+coverTheme: celestial-gold
+---
+
+import TransformerDiagram from '../../components/articles/TransformerDiagram.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
+
+自 2017 年 *Attention Is All You Need* 发表至今，无论是早期的 GPT/BERT，还是 2026 年最新的万亿参数推理大模型，其骨架始终建立在同一个核心原语之上——**Transformer**。
+
+本系列将用四篇文章，结合**高清结构图解、数学推导与完整可运行的 PyTorch 代码**，带你从零把现代大语言模型的每一个齿轮全部拆透。
+
+## 一、全景架构图解：经典 Transformer 与现代 LLM 的演进
+
+很多人背诵的是 2017 年论文里的原始结构，但今天生产环境中的 LLaMA、Qwen、DeepSeek、Claude、GPT 早已在四个关键位置完成了统一演进：
+
+1. **Post-LN → Pre-LN（RMSNorm）**：将归一化提前到子层输入前，保留一条畅通无阻的残差梯度高速公路；
+2. **加性正弦位置编码 → 旋转位置编码（RoPE）**：不再往 Embedding 上硬加位置向量，而是在注意力计算前直接旋转 $Q, K$；
+3. **标准 MHA → 分组查询注意力（GQA / MLA）**：大幅压缩推理阶段的 KV Cache 显存；
+4. **ReLU FFN → SwiGLU 门控前馈网络**：提升非线性表达力与训练稳定性。
+
+<TransformerDiagram
+  variant="overview"
+  caption="图 1：2017 经典 Post-LN Transformer Block（左）与现代大语言模型 Pre-LN Block（右）架构对比"
+/>
+
+## 二、缩放点积注意力（Scaled Dot-Product Attention）
+
+给定输入隐状态张量 $X \in \mathbb{R}^{B \times T \times d_{\text{model}}}$，我们先通过三组线性变换投影出**查询（Query）**、**键（Key）**和**值（Value）**：
+
+$$
+Q = X W_Q, \qquad K = X W_K, \qquad V = X W_V
+$$
+
+核心注意力公式定义为：
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}} + M\right) V
+$$
+
+其中 $M$ 是自回归语言模型必备的**因果下三角掩码（Causal Mask）**：对角线上方全部填 $-\infty$，使得位置 $t$ 的 Token 只能关注 $[0, t]$ 历史信息，绝不偷看未来。
+
+### 为什么要除以 $\sqrt{d_k}$？（方差守恒推导）
+
+假设 $q, k \in \mathbb{R}^{d_k}$ 的各维度分量相互独立，且均值为 $0$、方差为 $1$，那么内积 $s = \sum_{i=1}^{d_k} q_i k_i$ 满足：
+
+$$
+\mathbb{E}[s] = 0, \qquad \text{Var}(s) = \sum_{i=1}^{d_k} \text{Var}(q_i)\text{Var}(k_i) = d_k
+$$
+
+当单头维度 $d_k = 128$ 时，内积的标准差高达 $\sqrt{128} \approx 11.3$。如果直接送入 $\text{softmax}$，数值极易落入饱和区（最大值概率逼近 $1$，其余逼近 $0$），导致梯度几乎消失。除以 $\sqrt{d_k}$ 正好把方差重新拉回 $1$：
+
+$$
+\text{Var}\!\left(\frac{q \cdot k}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1
+$$
+
+## 三、多头注意力张量维度流图解
+
+把单个 $d_{\text{model}}$ 空间拆成 $H$ 个独立子空间（每个头维度 $d_k = d_{\text{model}} / H$），让不同注意力头分别关注语法依赖、长距离指代、代码括号配对等不同关系，最后再拼接并通过 $W_O$ 融合：
+
+<TransformerDiagram
+  variant="attention"
+  caption="图 2：多头因果自注意力（Causal Multi-Head Attention）完整张量维度变换图"
+/>
+
+## 四、直观动态讲解（B 站经典视频）
+
+如果你想配合三维几何动画把 Q/K/V 矩阵乘法与语义投影直观打通，推荐先看 3Blue1Brown 这期经典视频：
+
+<VideoPlayer
+  platform="bilibili"
+  bvid="BV13z421U7cs"
+  title="【3Blue1Brown】GPT 是什么？直观可视化解释 Transformer 与注意力机制"
+/>
+
+## 五、完整 PyTorch 实现：手写多头因果自注意力
+
+下面的代码严格对应图 2 中的每一步张量形状变换，可以直接复制运行验证维度：
+
+```python
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class MultiHeadCausalAttention(nn.Module):
+    def __init__(self, d_model: int, n_heads: int, max_seq_len: int = 2048, dropout: float = 0.0):
+        super().__init__()
+        assert d_model % n_heads == 0, "d_model 必须能被 n_heads 整除"
+        self.n_heads = n_heads
+        self.head_dim = d_model // n_heads
+
+        # 合并 QKV 投影以提升 GPU 矩阵乘利用率
+        self.qkv_proj = nn.Linear(d_model, 3 * d_model, bias=False)
+        self.out_proj = nn.Linear(d_model, d_model, bias=False)
+        self.dropout = dropout
+
+        # 预注册上三角因果掩码（不作为可训练参数）
+        mask = torch.triu(torch.ones(max_seq_len, max_seq_len, dtype=torch.bool), diagonal=1)
+        self.register_buffer("causal_mask", mask, persistent=False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        B, T, C = x.shape  # [B, T, d_model]
+
+        # 1. 线性投影并拆分多头 -> [B, H, T, d_k]
+        qkv = self.qkv_proj(x).view(B, T, 3, self.n_heads, self.head_dim)
+        q, k, v = qkv.unbind(dim=2)
+        q = q.transpose(1, 2)
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
+
+        # 2. 缩放点积打分 -> [B, H, T, T]
+        scores = (q @ k.transpose(-2, -1)) / math.sqrt(self.head_dim)
+
+        # 3. 施加因果掩码，屏蔽未来位置
+        scores = scores.masked_fill(self.causal_mask[:T, :T], float("-inf"))
+
+        # 4. Softmax 归一化并加权聚合 V -> [B, H, T, d_k]
+        attn_weights = F.softmax(scores, dim=-1)
+        attn_weights = F.dropout(attn_weights, p=self.dropout, training=self.training)
+        out = attn_weights @ v
+
+        # 5. 多头拼接并经输出线性层融合 -> [B, T, d_model]
+        out = out.transpose(1, 2).contiguous().view(B, T, C)
+        return self.out_proj(out)
+
+if __name__ == "__main__":
+    attn = MultiHeadCausalAttention(d_model=512, n_heads=8)
+    dummy = torch.randn(2, 32, 512)
+    print("输出维度:", attn(dummy).shape)  # torch.Size([2, 32, 512])
+```
+
+下一篇我们将深入位置信息的核心奥秘：[《Transformer 详解（二）：从正弦位置编码到旋转位置编码 RoPE 数学图解》](/blog/transformer-02-positional-encoding-and-rope/)。

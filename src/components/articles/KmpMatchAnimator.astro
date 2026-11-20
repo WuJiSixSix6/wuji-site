@@ -1,0 +1,312 @@
+---
+/**
+ * Interactive KMP String Matching Animator (with Brute-Force comparison counter)
+ * Visually demonstrates why text pointer `i` NEVER moves backward while `P` jumps via π[j-1].
+ */
+interface Props {
+  defaultText?: string;
+  defaultPattern?: string;
+}
+const {
+  defaultText = 'ABABDABACDABABCABAB',
+  defaultPattern = 'ABABCABAB',
+} = Astro.props;
+const uid = `kmp-match-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class="wuji-kmp-widget my-8 p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] rounded-[3px]"
+  data-kmp-match-widget={uid}
+>
+  <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border-hairline)]">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="wuji-seal px-1.5 py-0.5 text-[10px]">动画</span>
+        <span class="text-sm font-bold font-editorial text-[var(--text-primary)]">
+          KMP 文本匹配全过程交互演示（与暴力法实时对比）
+        </span>
+      </div>
+      <p class="text-xs text-[var(--text-muted)] mt-1">
+        观察主串指针 <code class="font-mono">i</code> 始终单调右移，失配时模式串 <code class="font-mono">P</code> 按 <code class="font-mono">j = π[j-1]</code> 整体滑移
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <button type="button" data-preset-t="ABABDABACDABABCABAB" data-preset-p="ABABCABAB" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">经典回退</button>
+      <button type="button" data-preset-t="AAAAAAAAAB" data-preset-p="AAAB" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">最坏退化对比</button>
+      <button type="button" data-preset-t="ABABABABABA" data-preset-p="ABABA" class="px-2 py-1 border border-[var(--border-hairline)] rounded-[2px] hover:border-[var(--accent-seal)] text-[var(--text-secondary)] cursor-pointer">重叠多命中</button>
+    </div>
+  </div>
+
+  <!-- Inputs & Playback Controls -->
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-3 text-xs">
+      <label class="flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span>主串 T:</span>
+        <input
+          data-text-input
+          type="text"
+          maxlength="24"
+          value={defaultText}
+          class="w-44 px-2 py-1 font-mono uppercase bg-[var(--bg-canvas)] border border-[var(--border-strong)] rounded-[2px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-seal)]"
+        />
+      </label>
+      <label class="flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span>模式串 P:</span>
+        <input
+          data-pat-input
+          type="text"
+          maxlength="12"
+          value={defaultPattern}
+          class="w-28 px-2 py-1 font-mono uppercase bg-[var(--bg-canvas)] border border-[var(--border-strong)] rounded-[2px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-seal)]"
+        />
+      </label>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <button type="button" data-btn="prev" class="px-2.5 py-1 border border-[var(--border-hairline)] rounded-[2px] text-[var(--text-secondary)] hover:border-[var(--border-strong)] cursor-pointer">← 上一步</button>
+      <button type="button" data-btn="play" class="px-3 py-1 bg-[var(--ink-primary)] text-[var(--bg-canvas)] rounded-[2px] cursor-pointer">▶ 自动播放</button>
+      <button type="button" data-btn="next" class="px-2.5 py-1 border border-[var(--border-hairline)] rounded-[2px] text-[var(--text-secondary)] hover:border-[var(--border-strong)] cursor-pointer">下一步 →</button>
+      <button type="button" data-btn="reset" class="px-2.5 py-1 text-[var(--text-muted)] hover:text-[var(--accent-seal)] cursor-pointer">重置</button>
+    </div>
+  </div>
+
+  <!-- Telemetry strip: π array & comparison counts -->
+  <div class="mt-4 px-3.5 py-2 bg-[var(--bg-elevated)] border border-[var(--border-hairline)] rounded-[2px] flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+    <span data-pi-display class="text-[var(--text-secondary)]"></span>
+    <span data-metrics class="text-[var(--text-primary)]"></span>
+  </div>
+
+  <!-- Sliding Pattern Stage -->
+  <div class="mt-5 overflow-x-auto pb-2">
+    <div data-stage class="inline-flex flex-col gap-1.5 min-w-max"></div>
+  </div>
+
+  <!-- Step Narration -->
+  <div class="mt-4 pt-3.5 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+    <p data-narration class="text-[var(--text-primary)] leading-relaxed font-editorial"></p>
+    <span data-step-counter class="font-mono text-[var(--text-muted)] shrink-0"></span>
+  </div>
+</div>
+
+<script>
+  interface MatchStep {
+    i: number;
+    j: number;
+    offset: number;
+    status: 'compare' | 'match' | 'mismatch' | 'found' | 'done';
+    comparisons: number;
+    foundAt: number[];
+    note: string;
+  }
+
+  function computePi(p: string): number[] {
+    const m = p.length;
+    const pi = Array(m).fill(0);
+    let j = 0;
+    for (let i = 1; i < m; i++) {
+      while (j > 0 && p[i] !== p[j]) j = pi[j - 1];
+      if (p[i] === p[j]) j++;
+      pi[i] = j;
+    }
+    return pi;
+  }
+
+  function countBruteComparisons(t: string, p: string): number {
+    let c = 0;
+    for (let i = 0; i <= t.length - p.length; i++) {
+      for (let j = 0; j < p.length; j++) {
+        c++;
+        if (t[i + j] !== p[j]) break;
+      }
+    }
+    return c;
+  }
+
+  function buildMatchSteps(text: string, pat: string): { pi: number[]; steps: MatchStep[]; bruteTotal: number } {
+    const pi = computePi(pat);
+    const bruteTotal = countBruteComparisons(text, pat);
+    const steps: MatchStep[] = [];
+    const foundAt: number[] = [];
+    let comparisons = 0;
+    let j = 0;
+
+    for (let i = 0; i < text.length; i++) {
+      while (j > 0 && text[i] !== pat[j]) {
+        comparisons++;
+        const nextJ = pi[j - 1];
+        steps.push({
+          i,
+          j,
+          offset: i - j,
+          status: 'mismatch',
+          comparisons,
+          foundAt: [...foundAt],
+          note: `失配！T[${i}]='${text[i]}' ≠ P[${j}]='${pat[j]}'。主串指针 i=${i} 不回退，将模式串右移至 j = π[${j - 1}] = ${nextJ}（跳过 ${j - nextJ} 个无效起点）。`,
+        });
+        j = nextJ;
+      }
+
+      comparisons++;
+      if (text[i] === pat[j]) {
+        const curOffset = i - j;
+        j++;
+        if (j === pat.length) {
+          foundAt.push(curOffset);
+          const nextJ = pi[j - 1];
+          steps.push({
+            i,
+            j: pat.length - 1,
+            offset: curOffset,
+            status: 'found',
+            comparisons,
+            foundAt: [...foundAt],
+            note: `完全命中！在主串下标 ${curOffset} 处找到完整匹配。为继续搜索重叠匹配，令 j 跳回 π[${pat.length - 1}] = ${nextJ}。`,
+          });
+          j = nextJ;
+        } else {
+          steps.push({
+            i,
+            j: j - 1,
+            offset: curOffset,
+            status: 'match',
+            comparisons,
+            foundAt: [...foundAt],
+            note: `匹配：T[${i}] = P[${j - 1}] = '${text[i]}'，已连续匹配 ${j} 个字符，i 与 j 同步右移。`,
+          });
+        }
+      } else {
+        steps.push({
+          i,
+          j: 0,
+          offset: i,
+          status: 'mismatch',
+          comparisons,
+          foundAt: [...foundAt],
+          note: `首字符失配：T[${i}]='${text[i]}' ≠ P[0]='${pat[0]}'，模式串直接右移 1 位继续检查 T[${i + 1}]。`,
+        });
+      }
+    }
+
+    steps.push({
+      i: text.length - 1,
+      j,
+      offset: Math.max(0, text.length - pat.length),
+      status: 'done',
+      comparisons,
+      foundAt: [...foundAt],
+      note:
+        foundAt.length > 0
+          ? `扫描结束！共命中 ${foundAt.length} 处（起始下标：[${foundAt.join(', ')}]）。KMP 仅比较 ${comparisons} 次，朴素暴力法需 ${bruteTotal} 次。`
+          : `扫描结束，未找到匹配。KMP 仅比较 ${comparisons} 次（暴力法需 ${bruteTotal} 次）。`,
+    });
+
+    return { pi, steps, bruteTotal };
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-kmp-match-widget]').forEach((root) => {
+    const tInput = root.querySelector<HTMLInputElement>('[data-text-input]')!;
+    const pInput = root.querySelector<HTMLInputElement>('[data-pat-input]')!;
+    const piEl = root.querySelector<HTMLElement>('[data-pi-display]')!;
+    const metricsEl = root.querySelector<HTMLElement>('[data-metrics]')!;
+    const stageEl = root.querySelector<HTMLElement>('[data-stage]')!;
+    const narrationEl = root.querySelector<HTMLElement>('[data-narration]')!;
+    const counterEl = root.querySelector<HTMLElement>('[data-step-counter]')!;
+    const playBtn = root.querySelector<HTMLButtonElement>('[data-btn="play"]')!;
+
+    let text = (tInput.value || 'ABABDABACDABABCABAB').toUpperCase();
+    let pat = (pInput.value || 'ABABCABAB').toUpperCase();
+    let sim = buildMatchSteps(text, pat);
+    let idx = 0;
+    let timer: number | null = null;
+
+    function stopPlay() {
+      if (timer !== null) { clearInterval(timer); timer = null; }
+      playBtn.textContent = '▶ 自动播放';
+    }
+
+    function render() {
+      const step = sim.steps[idx];
+      if (!step) return;
+
+      piEl.textContent = `π = [${sim.pi.join(', ')}]`;
+      metricsEl.textContent = `KMP 比较: ${step.comparisons} 次  |  暴力总计: ${sim.bruteTotal} 次`;
+
+      let idxRow = '<div class="flex items-center gap-1"><span class="w-10 text-[10px] font-mono text-[var(--text-muted)]">下标</span>';
+      let tRow = '<div class="flex items-center gap-1"><span class="w-10 text-[11px] font-mono text-[var(--text-muted)]">T</span>';
+      let pRow = '<div class="flex items-center gap-1"><span class="w-10 text-[11px] font-mono text-[var(--text-muted)]">P</span>';
+
+      for (let k = 0; k < text.length; k++) {
+        const isCurrentI = k === step.i && step.status !== 'done';
+        idxRow += `<span class="w-8 text-center text-[10px] font-mono ${isCurrentI ? 'text-[var(--accent-seal)] font-bold' : 'text-[var(--text-muted)]'}">${isCurrentI ? `i:${k}` : k}</span>`;
+
+        const inFound = step.status === 'found' && k >= step.offset && k < step.offset + pat.length;
+        let tCls = 'border-[var(--border-hairline)] bg-[var(--bg-canvas)] text-[var(--text-primary)]';
+        if (inFound) {
+          tCls = 'border-[var(--accent-seal)] bg-[var(--accent-seal)] text-[#f6f1e7] font-bold';
+        } else if (isCurrentI && step.status === 'mismatch') {
+          tCls = 'border-[var(--accent-seal)] bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] font-bold';
+        } else if (k >= step.offset && k <= step.i && step.status === 'match') {
+          tCls = 'border-[var(--accent-jade)] bg-[var(--accent-jade-soft)] text-[var(--text-primary)] font-bold';
+        }
+        tRow += `<span class="w-8 h-8 inline-flex items-center justify-center font-mono text-xs border rounded-[2px] transition-colors ${tCls}">${text[k]}</span>`;
+
+        const pk = k - step.offset;
+        if (pk >= 0 && pk < pat.length && step.status !== 'done') {
+          let pCls = 'border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-secondary)]';
+          if (step.status === 'found') {
+            pCls = 'border-[var(--accent-seal)] bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] font-bold';
+          } else if (pk === step.j && step.status === 'mismatch') {
+            pCls = 'border-[var(--accent-seal)] bg-[var(--accent-seal)] text-[#f6f1e7] font-bold';
+          } else if (pk <= step.j && step.status === 'match') {
+            pCls = 'border-[var(--accent-jade)] bg-[var(--accent-jade-soft)] text-[var(--text-primary)] font-bold';
+          } else if (pk < step.j && step.status === 'mismatch') {
+            pCls = 'border-[var(--accent-jade)]/50 bg-[var(--accent-jade-soft)] text-[var(--text-primary)]';
+          }
+          pRow += `<span class="w-8 h-8 inline-flex items-center justify-center font-mono text-xs border rounded-[2px] transition-colors ${pCls}">${pat[pk]}</span>`;
+        } else {
+          pRow += '<span class="w-8 h-8 inline-block"></span>';
+        }
+      }
+
+      idxRow += '</div>';
+      tRow += '</div>';
+      pRow += '</div>';
+      stageEl.innerHTML = idxRow + tRow + pRow;
+      narrationEl.textContent = step.note;
+      counterEl.textContent = `步骤 ${idx + 1} / ${sim.steps.length}`;
+    }
+
+    function reload(newT: string, newP: string) {
+      stopPlay();
+      text = (newT.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24)) || 'ABABDABACDABABCABAB';
+      pat = (newP.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12)) || 'ABABCABAB';
+      if (pat.length > text.length) pat = text.slice(0, Math.max(1, Math.floor(text.length / 2)));
+      tInput.value = text;
+      pInput.value = pat;
+      sim = buildMatchSteps(text, pat);
+      idx = 0;
+      render();
+    }
+
+    root.querySelector('[data-btn="prev"]')?.addEventListener('click', () => { stopPlay(); if (idx > 0) { idx--; render(); } });
+    root.querySelector('[data-btn="next"]')?.addEventListener('click', () => { stopPlay(); if (idx < sim.steps.length - 1) { idx++; render(); } });
+    root.querySelector('[data-btn="reset"]')?.addEventListener('click', () => { stopPlay(); idx = 0; render(); });
+    playBtn.addEventListener('click', () => {
+      if (timer !== null) { stopPlay(); return; }
+      if (idx >= sim.steps.length - 1) idx = 0;
+      playBtn.textContent = '⏸ 暂停';
+      timer = window.setInterval(() => {
+        if (idx < sim.steps.length - 1) { idx++; render(); } else stopPlay();
+      }, 780);
+    });
+
+    tInput.addEventListener('change', () => reload(tInput.value, pInput.value));
+    pInput.addEventListener('change', () => reload(tInput.value, pInput.value));
+    root.querySelectorAll<HTMLButtonElement>('[data-preset-t]').forEach((btn) => {
+      btn.addEventListener('click', () => reload(btn.dataset.presetT || '', btn.dataset.presetP || ''));
+    });
+
+    render();
+  });
+</script>

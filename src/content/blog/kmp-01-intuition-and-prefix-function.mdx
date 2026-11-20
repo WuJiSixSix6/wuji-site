@@ -1,0 +1,141 @@
+---
+title: KMP 算法详解（一）：从暴力回溯到前缀函数 π 的核心直觉
+subtitle: 彻底抛弃死记硬背，用交互动画看懂最长相等真前后缀如何消除无效回溯
+summary: 深入剖析字符串匹配中朴素算法 O(nm) 退化的根源，通过数学定义与可交互的前缀函数（next / π 数组）步进构造动画，彻底打通 KMP 算法最难理解的状态回退直觉，并提供 Python、C++ 与 TypeScript 工业级模板。
+pubDate: 2026-11-18
+category: 算法精研
+tags:
+  - KMP
+  - 字符串算法
+  - 交互动画
+  - 前缀函数
+featured: true
+pinned: true
+coverTheme: celestial-gold
+---
+
+import KmpPrefixAnimator from '../../components/articles/KmpPrefixAnimator.astro';
+
+几乎每一位学习数据结构与算法的工程师，都在第一次面对 **KMP（Knuth–Morris–Pratt）** 算法时感到过挫败：代码只有短短十几行，尤其是那句 `while (j > 0 && p[i] != p[j]) j = pi[j - 1];`，初看仿佛某种凭空冒出来的魔法。
+
+事实上，KMP 的本质极其朴素——**绝不丢弃已经比较过的信息**。
+
+## 一、朴素匹配为何会退化到 $O(nm)$？
+
+假设主串 $T$ 长度为 $n$，模式串 $P$ 长度为 $m$。朴素（Brute-Force）算法在每个起点 $s \in [0, n - m]$ 逐字符比对；一旦在第 $j$ 位发生失配（$T[s + j] \neq P[j]$），就把主串指针回退到 $s + 1$，模式串退回 $0$ 重新开始。
+
+当遇到类似 $T = \text{"AAAAAAAAAAB"}$、$P = \text{"AAAB"}$ 的数据时：
+
+- 在位置 $0$ 比较了 $4$ 次，在第 $4$ 位 `'A' ≠ 'B'` 失配；
+- 退回位置 $1$，其实我们已经**明明知道** $T[1..2]$ 必然是 `"AA"`，却还是傻傻地从头再比一遍。
+
+于是最坏情况下的比较次数飙升至：
+
+$$
+T_{\text{naive}}(n, m) = O((n - m + 1) \cdot m) = O(nm)
+$$
+
+## 二、破局关键：Border（真前后缀）与前缀函数 $\pi$
+
+假设我们在 $T[i]$ 与 $P[j]$ 处刚刚失配。此时我们手握一条铁一般的事实：
+
+$$
+T[i - j \dots i - 1] = P[0 \dots j - 1]
+$$
+
+也就是说，主串刚刚扫过的后缀，恰好等于模式串的长度为 $j$ 的前缀。如果我们想把模式串向右滑动，使得滑移后模式串的新前缀与主串当前已匹配的后缀完全对齐，**且不漏掉任何可能的合法起点**，那么新对齐的长度 $k$ 必须同时满足：
+
+1. $k < j$（必须真正向右移动，即**真**前缀/后缀）；
+2. $P[0 \dots k - 1] = P[j - k \dots j - 1]$（模式串前缀等于后缀，称为该子串的一个 **Border**）；
+3. 为了不跳过潜在解，$k$ 必须取**所有合法 Border 中的最大值**。
+
+由此，我们正式定义**前缀函数（Prefix Function）** $\pi[i]$：
+
+$$
+\pi[i] = \max\Big\{\, k \in [0, i] \;\Big|\; P[0 \dots k - 1] = P[i - k + 1 \dots i] \,\Big\}
+$$
+
+特别约定 $\pi[0] = 0$（长度为 $1$ 的子串不存在真前后缀）。
+
+> [!IMPORTANT] 记号辨析：$\pi[i]$ 与教材里的 `next[i]`
+> 现代算法竞赛（CP-Algorithms、OI-Wiki）普遍采用 0-based 的前缀函数 $\pi[i]$，它直接表示子串 $P[0..i]$ 的最长相等真前后缀**长度**，含义最直观、最不易写错边界。国内部分考研教材将其整体右移一位并在首项补 `-1`，本质完全等价，第二篇会给出精确对照表。
+
+## 三、交互动画：亲手观察 $\pi$ 数组的构造过程
+
+为什么计算 $\pi[i]$ 时，一旦 $P[i] \neq P[j]$，只需令 `j = pi[j - 1]` 就能按长度从大到小枚举出 $P[0..i-1]$ 的**全部** Border？
+
+因为 $P[0..j-1]$ 与 $P[i-j..i-1]$ 已经完全相等，那么 $P[0..i-1]$ 的次长 Border，**必然同时也是 $P[0..j-1]$ 的最长 Border**——这恰好就是已经算出来的 $\pi[j - 1]$！
+
+点击下方交互演示的 **「下一步」** 或 **「自动播放」**，或切换 `AABAABAAA`、`ABCDABD` 甚至输入你自己的模式串，一步步观察 `j = π[j - 1]` 的回退链：
+
+<KmpPrefixAnimator defaultPattern="ABABACA" />
+
+## 四、前缀函数的简洁多语言实现
+
+理解了 Border 的嵌套结构后，求 $\pi$ 数组的代码便水到渠成，没有任何多余分支：
+
+### Python 实现
+
+```python
+def compute_prefix_function(pattern: str) -> list[int]:
+    m = len(pattern)
+    pi = [0] * m
+    j = 0  # 当前已匹配的最长真前后缀长度
+    for i in range(1, m):
+        while j > 0 and pattern[i] != pattern[j]:
+            j = pi[j - 1]  # 沿 Border 链回退到次长候选
+        if pattern[i] == pattern[j]:
+            j += 1
+        pi[i] = j
+    return pi
+
+print(compute_prefix_function("ABABACA"))   # [0, 0, 1, 2, 3, 0, 1]
+print(compute_prefix_function("AABAABAAA")) # [0, 1, 0, 1, 2, 3, 4, 5, 2]
+```
+
+### C++ 实现
+
+```cpp
+#include <string>
+#include <vector>
+
+std::vector<int> compute_pi(const std::string& p) {
+    int m = static_cast<int>(p.size());
+    std::vector<int> pi(m, 0);
+    for (int i = 1, j = 0; i < m; ++i) {
+        while (j > 0 && p[i] != p[j]) {
+            j = pi[j - 1];
+        }
+        if (p[i] == p[j]) {
+            ++j;
+        }
+        pi[i] = j;
+    }
+    return pi;
+}
+```
+
+### TypeScript 实现
+
+```ts
+export function computePrefixFunction(pattern: string): number[] {
+  const m = pattern.length;
+  const pi = new Array<number>(m).fill(0);
+  for (let i = 1, j = 0; i < m; i++) {
+    while (j > 0 && pattern[i] !== pattern[j]) {
+      j = pi[j - 1];
+    }
+    if (pattern[i] === pattern[j]) {
+      j++;
+    }
+    pi[i] = j;
+  }
+  return pi;
+}
+```
+
+## 五、本篇小结与下篇预告
+
+到这里，你已经掌握了 KMP 算法最核心的一半：**把模式串自身的重复结构压缩进长度仅 $m$ 的前缀数组 $\pi$**。
+
+在下一篇 [《KMP 算法详解（二）：匹配过程动画演练、势能法复杂度证明与边界陷阱》](/blog/kmp-02-matching-animation-and-amortized-proof/) 中，我们将通过实时滑动窗口动画对比 KMP 与暴力算法的比较次数，并用严格的势能法证明内层 `while` 循环为何不会让总复杂度超过 $O(n + m)$。

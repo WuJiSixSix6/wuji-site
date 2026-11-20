@@ -92,8 +92,8 @@
 
       function getRgb(isRed: boolean) {
         const isDark = document.documentElement.classList.contains('dark');
-        if (isRed) return isDark ? '222, 76, 68' : '185, 43, 39';
-        return isDark ? '218, 224, 226' : '24, 28, 31';
+        if (isRed) return isDark ? '196, 74, 64' : '158, 42, 34';
+        return isDark ? '226, 221, 210' : '28, 27, 24';
       }
 
       function wake() {
@@ -319,11 +319,11 @@
           ctx!.rotate(s.rot);
           ctx!.scale(s.scale, s.scale);
           ctx!.globalAlpha = Math.min(1, s.alpha * 1.15);
-          ctx!.fillStyle = 'rgba(185, 43, 39, 0.92)';
-          ctx!.strokeStyle = 'rgba(255, 236, 224, 0.55)';
-          ctx!.lineWidth = 1.5;
+          ctx!.fillStyle = 'rgba(158, 42, 34, 0.9)';
+          ctx!.strokeStyle = 'rgba(246, 241, 231, 0.45)';
+          ctx!.lineWidth = 1.2;
           ctx!.beginPath();
-          ctx!.roundRect(-24, -24, 48, 48, 6);
+          ctx!.roundRect(-22, -22, 44, 44, 2);
           ctx!.fill();
           ctx!.stroke();
           ctx!.fillStyle = '#fbf4ea';

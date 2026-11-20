@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import InkHeroScene from '../components/InkHeroScene.astro';
 import PostCard from '../components/PostCard.astro';
-import WuJiLogo from '../components/WuJiLogo.astro';
 import { SITE, getCategoryMeta } from '../data/site';
 import {
   getPublishedPosts,
@@ -16,365 +15,249 @@ const posts = await getPublishedPosts();
 const stats = getTotalStats(posts);
 const categories = getCategoriesMap(posts);
 
-const featuredPosts = posts.filter((p) => p.data.featured || p.data.pinned).slice(0, 3);
-const primaryFeatured = featuredPosts[0] || posts[0];
-const secondaryFeatured = featuredPosts.slice(1, 3);
-const latestPosts = posts.slice(0, 6);
+const leadPost = posts.find((p) => p.data.pinned) || posts[0];
+const gridPosts = posts.filter((p) => p.id !== leadPost?.id).slice(0, 4);
 ---
 
 <BaseLayout title={SITE.title} description={SITE.heroSubtitle}>
   <!-- =========================================================
-       CHINESE INK WASH SHAN-SHUI HERO SECTION
+       EXHIBITION-GRADE CHINESE INK WASH HERO (留白 · 画卷)
        ========================================================= -->
-  <section class="relative -mt-24 pt-36 pb-24 sm:pt-44 sm:pb-32 overflow-hidden">
+  <section class="relative -mt-24 pt-36 pb-16 sm:pt-44 sm:pb-20 overflow-hidden">
     <InkHeroScene />
 
-    <!-- Vertical Classical Scroll Inscription (右侧立轴题跋) -->
-    <div
-      class="hidden lg:flex flex-col items-center gap-4 absolute right-8 xl:right-14 top-36 z-10 select-none pointer-events-none opacity-60"
-      aria-hidden="true"
-    >
-      <span class="vertical-inscription text-xs text-[var(--text-secondary)] font-serif">
-        道生一 · 一生二 · 二生三 · 三生万物
-      </span>
-      <span class="wuji-seal w-6 h-12 text-xs vertical-inscription tracking-normal py-1">
-        无极
-      </span>
-    </div>
+    <div class="relative z-10 max-w-5xl mx-auto px-5 sm:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_180px] gap-12 items-start">
+        <!-- Left: Quiet Authoritative Editorial Typography -->
+        <div class="max-w-2xl">
+          <div class="flex items-center gap-4">
+            <h1 class="text-5xl sm:text-7xl font-bold tracking-[0.14em] text-[var(--text-primary)] font-editorial leading-none">
+              无极
+            </h1>
+            <span class="wuji-seal w-8 h-8 sm:w-9 sm:h-9 text-sm sm:text-base mt-1">
+              无极
+            </span>
+          </div>
 
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="max-w-3xl">
-        <!-- Interactive Poetic Quote Switcher (无极诗笺 · 点击换签) -->
-        <button
-          id="wuji-motto-btn"
-          type="button"
-          class="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--bg-surface)]/92 text-xs text-[var(--text-secondary)] hover:border-[var(--accent-seal)]/55 transition-colors mb-7 cursor-pointer"
-          title="点击切换无极诗笺"
-        >
-          <span class="wuji-seal w-4.5 h-4.5 text-[10px]">签</span>
-          <span id="wuji-motto-text" class="transition-opacity duration-300 font-serif">
-            无极而太极，极简而深邃。
-          </span>
-          <span class="text-[10px] font-mono text-[var(--accent-seal)] opacity-75 group-hover:opacity-100">
-            换签 ↻
-          </span>
-        </button>
+          <p class="mt-5 text-sm font-mono tracking-[0.26em] uppercase text-[var(--text-muted)]">
+            WUJI · PERSONAL ARCHIVE &amp; WRITINGS
+          </p>
 
-        <!-- Dramatic Calligraphy Hero Title -->
-        <h1 class="flex flex-wrap items-end gap-x-4 gap-y-2">
-          <span
-            class="text-7xl sm:text-8xl lg:text-[6.5rem] leading-[0.95] text-[var(--text-primary)] font-calligraphy tracking-wide"
-          >
-            无极
-          </span>
-          <span class="wuji-seal px-2.5 py-1.5 text-lg sm:text-xl mb-2 -rotate-3">
-            之印
-          </span>
-          <span
-            class="text-2xl sm:text-3xl font-mono font-semibold tracking-[0.22em] uppercase text-[var(--text-muted)] mb-2 ml-1"
-          >
-            WUJI
-          </span>
-        </h1>
+          <p class="mt-7 text-base sm:text-[17px] text-[var(--text-secondary)] leading-[1.95] max-w-xl font-editorial">
+            {SITE.tagline} {SITE.heroSubtitle}
+          </p>
 
-        <p class="mt-6 text-base sm:text-lg text-[var(--text-secondary)] leading-loose max-w-2xl">
-          {SITE.heroSubtitle}
-        </p>
+          <!-- Clean Editorial Links (No flashy SaaS gradient buttons) -->
+          <div class="mt-9 flex flex-wrap items-center gap-6 text-sm">
+            <a
+              href="/blog/"
+              class="ink-magnetic inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--ink-primary)] text-[var(--bg-canvas)] rounded-[3px] tracking-[0.1em] hover:opacity-88 transition-opacity"
+            >
+              <span>进入文集</span>
+              <span aria-hidden="true">→</span>
+            </a>
 
-        <!-- Primary Magnetic CTAs -->
-        <div class="mt-9 flex flex-wrap items-center gap-3.5">
-          <a
-            href="/blog/"
-            class="ink-magnetic inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm text-[#fbf6ee] shadow-[0_12px_28px_-10px_rgba(185,43,39,0.55)] cursor-pointer"
-            style="background: linear-gradient(135deg, #c93832 0%, #a6231f 100%);"
-          >
-            <span>展卷阅文</span>
-            <span aria-hidden="true">→</span>
-          </a>
+            <a
+              href="/archive/"
+              class="text-[var(--text-secondary)] hover:text-[var(--accent-seal)] pb-0.5 border-b border-[var(--border-strong)] hover:border-[var(--accent-seal)] transition-colors tracking-[0.08em]"
+            >
+              按年归档
+            </a>
 
-          <a
-            href="/archive/"
-            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-strong)] bg-[var(--bg-surface)]/92 text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-colors"
-          >
-            <span>岁月归档</span>
-          </a>
-
-          <a
-            href="/about/"
-            class="ink-magnetic inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
-          >
-            <span>关于无极</span>
-          </a>
+            <a
+              href="/about/"
+              class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors tracking-[0.08em]"
+            >
+              关于站主
+            </a>
+          </div>
         </div>
 
-        <!-- Interactive Ink-Wash Studio Bar (水墨雅玩互动台) -->
-        <div class="mt-8 inline-flex flex-wrap items-center gap-2 p-2 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92 shadow-sm">
-          <span class="px-2.5 text-[11px] font-mono text-[var(--text-muted)] tracking-wider">
-            ✦ 雅玩互动
-          </span>
+        <!-- Right: Classical Vertical Inscription (立轴题跋 · 点击可换句) -->
+        <div class="hidden lg:flex justify-end pt-2">
+          <button
+            id="wuji-motto-btn"
+            type="button"
+            title="轻点切换立轴题句"
+            class="group flex items-start gap-4 py-4 px-5 border-l border-[var(--border-hairline)] text-left cursor-pointer focus:outline-none"
+          >
+            <span
+              id="wuji-motto-text"
+              class="vertical-inscription text-[15px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] font-calligraphy leading-relaxed transition-opacity duration-300 h-52"
+            >
+              道生一，一生二，二生三，三生万物。
+            </span>
+            <div class="flex flex-col items-center gap-3 pt-1">
+              <span class="wuji-seal-outline w-5 py-1.5 text-[10px] vertical-inscription tracking-normal">
+                诗笺
+              </span>
+              <span class="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--accent-seal)] vertical-inscription tracking-widest">
+                轻点换句
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiet Bottom Colophon Rule + Minimal Interactive Ink Actions -->
+      <div class="mt-20 pt-5 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono">
+          <span>藏文 {stats.postCount} 篇</span>
+          <span>·</span>
+          <span>笔耕 {(stats.totalWords / 1000).toFixed(1)} 千字</span>
+          <span>·</span>
+          <span>{stats.categoryCount} 卷目 / {stats.tagCount} 标签</span>
+        </div>
+
+        <div class="flex items-center gap-5">
+          <span class="hidden sm:inline text-[11px] opacity-70">画卷雅玩：</span>
           <button
             id="hero-btn-splash"
             type="button"
-            class="ink-magnetic px-3 py-1.5 rounded-xl text-xs font-medium bg-[var(--ink-primary)] text-[var(--bg-canvas)] hover:opacity-90 transition-opacity cursor-pointer"
+            class="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            泼墨一笔
+            泼墨
           </button>
           <button
             id="hero-btn-stamp"
             type="button"
-            class="ink-magnetic px-3 py-1.5 rounded-xl text-xs font-medium bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] border border-[var(--accent-seal)]/35 hover:bg-[var(--accent-seal)] hover:text-[#fbf5ec] transition-colors cursor-pointer"
+            class="hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
           >
-            朱砂落印
-          </button>
-          <button
-            id="hero-btn-mode"
-            type="button"
-            class="ink-magnetic px-3 py-1.5 rounded-xl text-xs font-medium bg-[var(--accent-jade-soft)] text-[var(--accent-jade)] border border-[var(--accent-jade)]/35 hover:bg-[var(--accent-jade)] hover:text-[#fbf5ec] transition-colors cursor-pointer"
-          >
-            宣纸 / 墨夜
+            落印
           </button>
           <button
             id="hero-btn-clear"
             type="button"
-            class="px-2.5 py-1.5 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            class="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             拂尘
           </button>
         </div>
       </div>
-
-      <!-- Telemetry Stats Strip -->
-      <div class="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl">
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
-          <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.postCount}</div>
-          <div class="text-xs text-[var(--text-muted)] mt-0.5">藏卷篇数 · Posts</div>
-        </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
-          <div class="text-2xl font-bold font-mono text-[var(--accent-seal)]">
-            {(stats.totalWords / 1000).toFixed(1)}k
-          </div>
-          <div class="text-xs text-[var(--text-muted)] mt-0.5">笔耕字数 · Words</div>
-        </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
-          <div class="text-2xl font-bold font-mono text-[var(--accent-jade)]">{stats.categoryCount}</div>
-          <div class="text-xs text-[var(--text-muted)] mt-0.5">专题卷目 · Topics</div>
-        </div>
-        <div class="px-4 py-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/92">
-          <div class="text-2xl font-bold font-mono text-[var(--text-primary)]">{stats.tagCount}</div>
-          <div class="text-xs text-[var(--text-muted)] mt-0.5">知识墨签 · Tags</div>
-        </div>
-      </div>
     </div>
   </section>
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6"><hr class="ink-divider" /></div>
-
   <!-- =========================================================
-       FEATURED BENTO SHOWCASE (精选画卷)
+       LEAD ESSAY SPREAD (卷首长文)
        ========================================================= -->
   {
-    primaryFeatured && (
-      <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-16">
-        <div class="flex items-end justify-between gap-4 mb-8 ink-reveal">
-          <div>
-            <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-seal)]">
-              Curated Scroll · 卷首精选
-            </p>
-            <h2
-              class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
-              style="font-family: var(--font-serif);"
-            >
-              置顶与代表作
+    leadPost && (() => {
+      const meta = computePostMeta(leadPost.body);
+      return (
+        <section class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+          <div class="flex items-baseline justify-between mb-6 ink-reveal">
+            <h2 class="text-sm font-editorial tracking-[0.2em] text-[var(--text-muted)]">
+              卷首精选
             </h2>
+            <a
+              href="/blog/"
+              class="text-xs text-[var(--text-muted)] hover:text-[var(--accent-seal)] transition-colors"
+            >
+              全部文章 →
+            </a>
           </div>
+
           <a
-            href="/blog"
-            class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
+            href={`/blog/${leadPost.id}/`}
+            class="wuji-card wuji-card-interactive ink-reveal group block p-7 sm:p-10 border-l-2 border-l-[var(--accent-seal)]"
           >
-            查看全部 →
+            <div class="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)] mb-4">
+              <span class="wuji-seal px-1.5 py-0.5 text-[10px]">卷首</span>
+              <span class="text-[var(--text-secondary)]">「{leadPost.data.category}」</span>
+              <span class="font-mono">{formatDate(leadPost.data.pubDate).replace(/-/g, '.')}</span>
+              <span>·</span>
+              <span class="font-mono">{meta.readingMinutes} 分钟阅读</span>
+              <span>·</span>
+              <span class="font-mono">{meta.wordCount.toLocaleString()} 字</span>
+            </div>
+
+            <h3 class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors leading-snug font-editorial">
+              {leadPost.data.title}
+            </h3>
+
+            {leadPost.data.subtitle && (
+              <p class="mt-2.5 text-sm sm:text-base text-[var(--text-muted)] font-editorial">
+                {leadPost.data.subtitle}
+              </p>
+            )}
+
+            <p class="mt-4 text-[15px] text-[var(--text-secondary)] leading-[1.9] max-w-3xl">
+              {leadPost.data.summary}
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-[var(--border-hairline)] text-xs">
+              <div class="flex flex-wrap items-center gap-3 font-mono text-[var(--text-muted)]">
+                {leadPost.data.tags.slice(0, 4).map((t) => <span>#{t}</span>)}
+              </div>
+              <span class="text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] tracking-wider transition-colors">
+                展卷细读 →
+              </span>
+            </div>
           </a>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {(() => {
-            const meta = computePostMeta(primaryFeatured.body);
-            return (
-              <a
-                href={`/blog/${primaryFeatured.id}`}
-                class:list={[
-                  'lg:col-span-7 wuji-card wuji-card-interactive ink-reveal group relative rounded-2xl overflow-hidden p-7 sm:p-9 flex flex-col justify-between min-h-[340px]',
-                  `cover-${primaryFeatured.data.coverTheme || 'celestial-gold'}`,
-                ]}
-              >
-                <!-- Subtle Ink Mountain Overlay -->
-                <svg
-                  class="absolute inset-x-0 bottom-0 w-full h-36 text-white opacity-[0.09] group-hover:opacity-[0.15] transition-opacity duration-500 pointer-events-none"
-                  viewBox="0 0 600 150"
-                  preserveAspectRatio="none"
-                  fill="currentColor"
-                >
-                  <path d="M0,125 C85,80 150,45 245,75 C330,102 415,28 515,62 C558,76 582,82 600,70 L600,150 L0,150 Z" />
-                </svg>
-
-                <div class="absolute right-6 top-6 opacity-25 group-hover:opacity-45 group-hover:rotate-12 transition-all duration-700 pointer-events-none">
-                  <WuJiLogo size={84} />
-                </div>
-
-                <div class="relative z-10 flex flex-wrap items-center gap-2.5">
-                  <span class="wuji-seal px-2.5 py-1 text-xs tracking-widest">
-                    卷首置顶
-                  </span>
-                  <span class="px-3 py-1 rounded-lg text-xs font-medium bg-black/40 backdrop-blur-md text-[#f4ece0] border border-white/15">
-                    {primaryFeatured.data.category}
-                  </span>
-                </div>
-
-                <div class="relative z-10 mt-10">
-                  <h3
-                    class="text-2xl sm:text-3xl font-bold text-[#f9f4eb] leading-snug group-hover:text-[#ffd6ce] transition-colors"
-                    style="font-family: var(--font-serif);"
-                  >
-                    {primaryFeatured.data.title}
-                  </h3>
-                  <p class="mt-3 text-sm sm:text-base text-white/75 leading-relaxed line-clamp-3 max-w-xl">
-                    {primaryFeatured.data.summary}
-                  </p>
-                  <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-white/15 text-xs font-mono text-white/75">
-                    <div class="flex items-center gap-3">
-                      <span>{formatDate(primaryFeatured.data.pubDate)}</span>
-                      <span>·</span>
-                      <span>{meta.readingMinutes} 分钟阅读</span>
-                      <span>·</span>
-                      <span>{meta.wordCount.toLocaleString()} 字</span>
-                    </div>
-                    <span class="text-[#f7d8d0] font-sans font-medium group-hover:translate-x-1 transition-transform">
-                      展卷品读 →
-                    </span>
-                  </div>
-                </div>
-              </a>
-            );
-          })()}
-
-          <div class="lg:col-span-5 flex flex-col gap-5">
-            {secondaryFeatured.map((post) => {
-              const meta = computePostMeta(post.body);
-              return (
-                <a
-                  href={`/blog/${post.id}`}
-                  class="wuji-card wuji-card-interactive ink-reveal group flex-1 p-6 flex flex-col justify-between"
-                >
-                  <div>
-                    <div class="flex items-center justify-between gap-2 text-xs mb-3">
-                      <span class="px-2.5 py-0.5 rounded-lg bg-[var(--accent-jade-soft)] text-[var(--accent-jade)] font-medium">
-                        {post.data.category}
-                      </span>
-                      <span class="font-mono text-[var(--text-muted)]">
-                        {formatDate(post.data.pubDate)}
-                      </span>
-                    </div>
-                    <h3
-                      class="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors line-clamp-2"
-                      style="font-family: var(--font-serif);"
-                    >
-                      {post.data.title}
-                    </h3>
-                    <p class="mt-2 text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-                      {post.data.summary}
-                    </p>
-                  </div>
-                  <div class="mt-4 pt-3 border-t border-[var(--border-hairline)] flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
-                    <span>{meta.readingMinutes} 分钟 · {meta.wordCount.toLocaleString()} 字</span>
-                    <span class="text-[var(--accent-seal)] font-sans group-hover:translate-x-0.5 transition-transform">
-                      阅读 →
-                    </span>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    )
+        </section>
+      );
+    })()
   }
 
   <!-- =========================================================
-       LATEST ARTICLES GRID
+       RECENT ESSAYS (近作录 · 2-Column Editorial Book Plates)
        ========================================================= -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-    <div class="flex items-end justify-between gap-4 mb-8 ink-reveal">
-      <div>
-        <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-jade)]">
-          Latest Essays · 近期新篇
-        </p>
-        <h2
-          class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
-          style="font-family: var(--font-serif);"
-        >
-          最新博客文章
-        </h2>
-      </div>
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-10">
+    <div class="flex items-baseline justify-between mb-6 ink-reveal">
+      <h2 class="text-sm font-editorial tracking-[0.2em] text-[var(--text-muted)]">
+        近期文字
+      </h2>
       <a
-        href="/blog"
-        class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
+        href="/archive/"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--accent-seal)] transition-colors"
       >
-        进入藏书阁 →
+        时间轴归档 →
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {latestPosts.map((post) => <PostCard post={post} />)}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {gridPosts.map((post) => <PostCard post={post} />)}
     </div>
   </section>
 
   <!-- =========================================================
-       CATEGORIES MATRIX
+       CLASSICAL BOOK CATALOG: CATEGORIES (卷目索引)
        ========================================================= -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-    <div class="flex items-end justify-between gap-4 mb-8 ink-reveal">
-      <div>
-        <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-seal)]">
-          Dimensions · 卷目维度
-        </p>
-        <h2
-          class="mt-1.5 text-2xl sm:text-3xl font-bold text-[var(--text-primary)]"
-          style="font-family: var(--font-serif);"
-        >
-          专题分类导览
-        </h2>
-      </div>
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-14">
+    <div class="flex items-baseline justify-between mb-6 ink-reveal">
+      <h2 class="text-sm font-editorial tracking-[0.2em] text-[var(--text-muted)]">
+        卷目索引
+      </h2>
       <a
-        href="/categories"
-        class="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
+        href="/categories/"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--accent-seal)] transition-colors"
       >
-        全部分类 →
+        查看全部分类 →
       </a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="border-t border-[var(--border-strong)] ink-reveal">
       {
-        categories.map((cat) => {
+        categories.map((cat, idx) => {
           const meta = getCategoryMeta(cat.name);
+          const num = String(idx + 1).padStart(2, '0');
           return (
             <a
-              href={`/categories/${encodeURIComponent(cat.name)}`}
-              class="wuji-card wuji-card-interactive ink-reveal group p-5 flex items-start gap-4"
+              href={`/categories/${encodeURIComponent(cat.name)}/`}
+              class="group flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 py-5 border-b border-[var(--border-hairline)] hover:pl-2 transition-all"
             >
-              <div class="shrink-0 w-11 h-11 rounded-xl bg-[var(--accent-seal-soft)] border border-[var(--accent-seal)]/25 flex items-center justify-center text-lg text-[var(--accent-seal)] group-hover:scale-105 transition-transform">
-                {meta.glyph}
+              <div class="flex items-baseline gap-4 min-w-0">
+                <span class="font-mono text-xs text-[var(--text-muted)] shrink-0">{num}</span>
+                <span class="text-base sm:text-lg font-bold font-editorial text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors shrink-0">
+                  {cat.name}
+                </span>
+                <span class="hidden md:inline text-sm text-[var(--text-muted)] truncate">
+                  — {meta.desc}
+                </span>
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors">
-                    {cat.name}
-                  </h3>
-                  <span class="text-xs font-mono px-2 py-0.5 rounded-lg bg-[var(--bg-elevated)] text-[var(--text-muted)]">
-                    {cat.count} 篇
-                  </span>
-                </div>
-                <p class="mt-1.5 text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
-                  {meta.desc}
-                </p>
+              <div class="flex items-center gap-4 pl-8 sm:pl-0 shrink-0 text-xs font-mono text-[var(--text-muted)]">
+                <span>{cat.count} 篇</span>
+                <span class="group-hover:text-[var(--accent-seal)] transition-colors">→</span>
               </div>
             </a>
           );
@@ -385,13 +268,12 @@ const latestPosts = posts.slice(0, 6);
 </BaseLayout>
 
 <script>
-  // Interactive poetic motto switcher (无极诗笺)
   const mottos = [
+    '道生一，一生二，二生三，三生万物。',
     '无极而太极，极简而深邃。',
-    '以代码筑器，以水墨载道。',
     '山高月小，水落石出，架构亦然。',
     '静水流深，繁华落尽见真淳。',
-    '万物并作，吾以观复，精微致广大。',
+    '致虚极，守静笃，万物并作。',
   ];
   let mottoIdx = 0;
   const mottoBtn = document.getElementById('wuji-motto-btn');
@@ -413,12 +295,11 @@ const latestPosts = posts.slice(0, 6);
     );
   });
 
-  // Hero interactive studio bar controls
   const stampWords = ['无极', '清雅', '悟道', '极境', '墨韵'];
   let stampIdx = 0;
 
   document.getElementById('hero-btn-splash')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('wuji-hero-splash', { detail: { isRed: Math.random() < 0.25 } }));
+    window.dispatchEvent(new CustomEvent('wuji-hero-splash', { detail: { isRed: Math.random() < 0.2 } }));
     window.dispatchEvent(new CustomEvent('wuji-ink-splash', { detail: { isRed: false, big: true } }));
   });
 
@@ -428,16 +309,12 @@ const latestPosts = posts.slice(0, 6);
     window.dispatchEvent(
       new CustomEvent('wuji-stamp-effect', {
         detail: {
-          x: window.innerWidth * (0.48 + Math.random() * 0.34),
-          y: window.innerHeight * (0.22 + Math.random() * 0.38),
+          x: window.innerWidth * (0.48 + Math.random() * 0.3),
+          y: window.innerHeight * (0.24 + Math.random() * 0.34),
           text: word,
         },
       })
     );
-  });
-
-  document.getElementById('hero-btn-mode')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('wuji-request-theme-toggle'));
   });
 
   document.getElementById('hero-btn-clear')?.addEventListener('click', () => {

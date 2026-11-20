@@ -1,13 +1,12 @@
 ---
 /**
- * Cinnabar-Ink brush reading progress bar + Floating Inkstone Back-to-Top button
+ * Hairline antique cinnabar reading progress line + Square Inkstone Back-to-Top button
  */
 ---
 
 <div
   id="wuji-reading-progress"
-  class="fixed top-0 left-0 h-[3px] z-50 w-0 pointer-events-none transition-[width] duration-75"
-  style="background: linear-gradient(90deg, #181c1f 0%, #2b6469 48%, #b92b27 100%); box-shadow: 0 0 10px rgba(185, 43, 39, 0.55);"
+  class="fixed top-0 left-0 h-[2px] z-50 w-0 pointer-events-none transition-[width] duration-75 bg-[var(--accent-seal)]"
   aria-hidden="true"
 ></div>
 
@@ -16,12 +15,9 @@
   type="button"
   aria-label="返回顶部"
   title="归顶"
-  class="ink-magnetic fixed bottom-6 right-6 z-40 hidden flex-col items-center justify-center w-12 h-12 rounded-2xl wuji-glass border border-[var(--border-strong)] text-[var(--accent-seal)] shadow-xl hover:border-[var(--accent-seal)] transition-all cursor-pointer"
+  class="fixed bottom-6 right-6 z-40 hidden flex-col items-center justify-center w-10 h-10 rounded-[3px] bg-[var(--bg-surface)] border border-[var(--border-strong)] text-[var(--text-secondary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
 >
-  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-    <path d="m18 15-6-6-6 6" />
-  </svg>
-  <span class="text-[10px] font-calligraphy leading-none mt-0.5">归顶</span>
+  <span class="text-xs font-calligraphy leading-none">归顶</span>
 </button>
 
 <script>

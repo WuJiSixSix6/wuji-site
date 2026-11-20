@@ -1,8 +1,8 @@
 ---
 /**
- * High-Performance Chinese Ink-Wash Shan-Shui Landscape Hero Backdrop
- * - Smooth GPU parallax with ZERO CSS transition conflict & auto-sleep when idle
- * - Persistent 1x watercolor splash canvas inside hero
+ * Whisper-Quiet Song-Dynasty Ink-Wash Shan-Shui Landscape Backdrop
+ * Authentic monochrome ink dilutions (焦/浓/重/淡/清), zero flashy orbs,
+ * auto-sleeping GPU parallax + persistent interactive ink wash layer.
  */
 ---
 
@@ -12,74 +12,61 @@
   style="contain: layout style paint;"
   aria-hidden="true"
 >
-  <!-- Persistent hero ink wash strokes canvas -->
+  <!-- Persistent interactive hero splash layer -->
   <canvas id="wuji-hero-paint-canvas" class="absolute inset-0 w-full h-full opacity-75"></canvas>
 
-  <!-- Celestial Vermilion Sun / Ink Moon -->
-  <div
-    data-parallax="16"
-    class="shanshui-layer absolute right-[9%] top-[13%] sm:right-[14%] sm:top-[15%] w-32 h-32 sm:w-48 sm:h-48 rounded-full will-change-transform"
-    style="background: radial-gradient(circle, rgba(185, 43, 39, 0.22) 0%, rgba(185, 43, 39, 0.08) 55%, transparent 72%);"
-  >
-    <div
-      class="absolute inset-6 rounded-full border border-[var(--accent-seal)]/20"
-      style="background: radial-gradient(circle at 38% 35%, rgba(205, 58, 52, 0.24), rgba(185, 43, 39, 0.04) 75%);"
-    ></div>
-  </div>
-
-  <!-- Distant Ink Mountain Layer 1 (远山如黛) -->
+  <!-- Distant Mountain Wash (清墨远岫) -->
   <svg
-    data-parallax="10"
-    class="shanshui-layer absolute bottom-0 left-[-4%] w-[108%] h-[58%] text-[var(--ink-primary)] opacity-[0.075] dark:opacity-[0.12] will-change-transform"
+    data-parallax="9"
+    class="shanshui-layer absolute bottom-0 left-[-4%] w-[108%] h-[54%] text-[var(--ink-primary)] opacity-[0.045] dark:opacity-[0.08] will-change-transform"
     viewBox="0 0 1440 420"
     preserveAspectRatio="none"
     fill="currentColor"
   >
-    <path d="M0,310 C120,245 210,165 340,190 C465,215 550,110 700,125 C845,140 940,55 1090,95 C1220,130 1320,185 1440,140 L1440,420 L0,420 Z" />
+    <path d="M0,330 C160,260 280,190 420,215 C560,240 660,125 820,145 C980,165 1090,80 1240,120 C1330,145 1390,175 1440,155 L1440,420 L0,420 Z" />
   </svg>
 
-  <!-- Mid-ground Ink Mountain Layer 2 (青岚叠嶂) -->
+  <!-- Mid-ground Misty Ridge (淡墨云岚) -->
+  <svg
+    data-parallax="18"
+    class="shanshui-layer absolute bottom-0 left-[-4%] w-[108%] h-[38%] text-[var(--accent-jade)] opacity-[0.08] dark:opacity-[0.12] will-change-transform"
+    viewBox="0 0 1440 340"
+    preserveAspectRatio="none"
+    fill="currentColor"
+  >
+    <path d="M0,255 C190,205 330,270 500,190 C670,115 790,210 960,165 C1120,120 1260,85 1440,160 L1440,340 L0,340 Z" />
+  </svg>
+
+  <!-- Foreground Ink Slope (重墨近峰) -->
+  <svg
+    data-parallax="28"
+    class="shanshui-layer absolute bottom-[-2px] left-[-4%] w-[108%] h-[24%] text-[var(--ink-primary)] opacity-[0.09] dark:opacity-[0.14] will-change-transform"
+    viewBox="0 0 1440 240"
+    preserveAspectRatio="none"
+    fill="currentColor"
+  >
+    <path d="M0,185 C210,130 370,205 565,155 C760,105 910,185 1125,135 C1275,100 1375,145 1440,120 L1440,240 L0,240 Z" />
+  </svg>
+
+  <!-- Delicate Pine / Bamboo Sprig on Top-Right Margin -->
   <svg
     data-parallax="20"
-    class="shanshui-layer absolute bottom-0 left-[-4%] w-[108%] h-[46%] text-[var(--accent-jade)] opacity-[0.13] dark:opacity-[0.18] will-change-transform"
-    viewBox="0 0 1440 360"
-    preserveAspectRatio="none"
-    fill="currentColor"
-  >
-    <path d="M0,260 C150,210 270,275 430,195 C580,120 695,220 845,170 C990,120 1130,65 1290,145 C1360,180 1405,195 1440,180 L1440,360 L0,360 Z" />
-  </svg>
-
-  <!-- Foreground Ink Mountain Layer 3 (浓墨近峰) -->
-  <svg
-    data-parallax="32"
-    class="shanshui-layer absolute bottom-[-4px] left-[-4%] w-[108%] h-[32%] text-[var(--ink-primary)] opacity-[0.14] dark:opacity-[0.22] will-change-transform"
-    viewBox="0 0 1440 280"
-    preserveAspectRatio="none"
-    fill="currentColor"
-  >
-    <path d="M0,210 C180,145 310,235 495,180 C680,125 810,210 1015,155 C1190,108 1315,175 1440,135 L1440,280 L0,280 Z" />
-  </svg>
-
-  <!-- Calligraphic Ink Bamboo Silhouette (右角墨竹) -->
-  <svg
-    data-parallax="24"
-    class="shanshui-layer hidden md:block absolute right-0 top-14 w-64 h-80 text-[var(--ink-primary)] opacity-[0.14] dark:opacity-[0.2] will-change-transform"
+    class="shanshui-layer hidden lg:block absolute right-2 top-16 w-56 h-72 text-[var(--ink-primary)] opacity-[0.085] dark:opacity-[0.14] will-change-transform"
     viewBox="0 0 260 320"
     fill="none"
   >
-    <path d="M248 315 C225 240 218 165 202 30" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" />
-    <path d="M214 148 C180 125 145 110 105 95" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-    <path d="M207 92 C175 72 150 58 118 46" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-    <path d="M148 112 C122 104 98 114 78 132 C104 128 128 122 148 112 Z" fill="currentColor" />
-    <path d="M168 120 C142 126 122 144 108 168 C132 154 152 138 168 120 Z" fill="currentColor" />
-    <path d="M132 54 C104 42 78 46 54 62 C82 60 108 60 132 54 Z" fill="currentColor" />
-    <path d="M160 66 C135 66 112 78 96 98 C122 88 142 78 160 66 Z" fill="currentColor" />
-    <path d="M205 64 C188 42 178 24 172 8 C188 26 198 44 205 64 Z" fill="currentColor" />
+    <path d="M250 310 C228 238 220 165 206 34" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+    <path d="M217 152 C185 130 150 116 112 102" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+    <path d="M210 96 C180 78 156 64 124 52" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+    <path d="M150 116 C126 110 104 118 86 134 C110 130 132 124 150 116 Z" fill="currentColor" />
+    <path d="M170 124 C146 130 128 146 116 168 C138 156 156 140 170 124 Z" fill="currentColor" />
+    <path d="M136 60 C110 50 86 54 64 68 C90 66 114 66 136 60 Z" fill="currentColor" />
+    <path d="M164 72 C142 72 120 84 106 102 C130 92 148 82 164 72 Z" fill="currentColor" />
   </svg>
 
-  <!-- Soft bottom fade into canvas -->
+  <!-- Seamless paper fade at bottom -->
   <div
-    class="absolute inset-x-0 bottom-0 h-28"
+    class="absolute inset-x-0 bottom-0 h-24"
     style="background: linear-gradient(to top, var(--bg-canvas) 0%, transparent 100%);"
   ></div>
 </div>
@@ -89,7 +76,6 @@
   const layers = Array.from(document.querySelectorAll<HTMLElement>('.shanshui-layer'));
   const paintCanvas = document.getElementById('wuji-hero-paint-canvas') as HTMLCanvasElement | null;
 
-  // Auto-sleeping parallax (stops rAF completely when pointer settles -> 0% idle CPU)
   if (container && layers.length > 0 && window.matchMedia('(pointer: fine)').matches) {
     let tx = 0;
     let ty = 0;
@@ -98,11 +84,11 @@
     let running = false;
 
     function tick() {
-      cx += (tx - cx) * 0.08;
-      cy += (ty - cy) * 0.08;
+      cx += (tx - cx) * 0.075;
+      cy += (ty - cy) * 0.075;
       for (const layer of layers) {
         const depth = Number(layer.dataset.parallax || 16);
-        layer.style.transform = `translate3d(${(-cx * depth).toFixed(2)}px, ${(-cy * depth * 0.5).toFixed(2)}px, 0)`;
+        layer.style.transform = `translate3d(${(-cx * depth).toFixed(2)}px, ${(-cy * depth * 0.45).toFixed(2)}px, 0)`;
       }
       if (Math.abs(tx - cx) > 0.0008 || Math.abs(ty - cy) > 0.0008) {
         requestAnimationFrame(tick);
@@ -114,7 +100,7 @@
     window.addEventListener(
       'pointermove',
       (e) => {
-        if (window.scrollY > 750) return; // Skip hero parallax once scrolled past hero
+        if (window.scrollY > 720) return;
         tx = e.clientX / Math.max(window.innerWidth, 1) - 0.5;
         ty = e.clientY / Math.max(window.innerHeight, 1) - 0.5;
         if (!running) {
@@ -126,7 +112,6 @@
     );
   }
 
-  // Persistent 1x watercolor splash canvas inside Hero
   if (paintCanvas) {
     const pctx = paintCanvas.getContext('2d');
     if (pctx) {
@@ -136,7 +121,7 @@
       function resizePaint() {
         const rect = paintCanvas!.parentElement?.getBoundingClientRect();
         pw = Math.round(rect ? rect.width : window.innerWidth);
-        ph = Math.round(rect ? rect.height : 620);
+        ph = Math.round(rect ? rect.height : 580);
         paintCanvas!.width = pw;
         paintCanvas!.height = ph;
       }
@@ -145,19 +130,19 @@
         const isDark = document.documentElement.classList.contains('dark');
         const rgb = isRed
           ? isDark
-            ? '222, 76, 68'
-            : '185, 43, 39'
+            ? '196, 74, 64'
+            : '158, 42, 34'
           : isDark
-            ? '214, 224, 226'
-            : '24, 28, 31';
+            ? '226, 221, 210'
+            : '28, 27, 24';
 
-        const cx = pw * (0.22 + Math.random() * 0.62);
-        const cy = ph * (0.18 + Math.random() * 0.54);
-        const maxR = 45 + Math.random() * 80;
+        const cx = pw * (0.2 + Math.random() * 0.62);
+        const cy = ph * (0.2 + Math.random() * 0.52);
+        const maxR = 42 + Math.random() * 78;
 
         const grad = pctx!.createRadialGradient(cx, cy, maxR * 0.08, cx, cy, maxR);
-        grad.addColorStop(0, `rgba(${rgb}, 0.14)`);
-        grad.addColorStop(0.55, `rgba(${rgb}, 0.06)`);
+        grad.addColorStop(0, `rgba(${rgb}, 0.12)`);
+        grad.addColorStop(0.55, `rgba(${rgb}, 0.05)`);
         grad.addColorStop(1, `rgba(${rgb}, 0)`);
         pctx!.fillStyle = grad;
         pctx!.beginPath();
@@ -172,26 +157,20 @@
         pctx!.closePath();
         pctx!.fill();
 
-        for (let k = 0; k < 10; k++) {
+        for (let k = 0; k < 9; k++) {
           const ang = Math.random() * Math.PI * 2;
           const dist = maxR * (0.45 + Math.random() * 0.85);
-          pctx!.fillStyle = `rgba(${rgb}, ${0.08 + Math.random() * 0.14})`;
+          pctx!.fillStyle = `rgba(${rgb}, ${0.07 + Math.random() * 0.12})`;
           pctx!.beginPath();
-          pctx!.arc(cx + Math.cos(ang) * dist, cy + Math.sin(ang) * dist, 1 + Math.random() * 3, 0, Math.PI * 2);
+          pctx!.arc(cx + Math.cos(ang) * dist, cy + Math.sin(ang) * dist, 1 + Math.random() * 2.8, 0, Math.PI * 2);
           pctx!.fill();
         }
       }
 
       resizePaint();
       window.addEventListener('resize', resizePaint, { passive: true });
-
-      window.addEventListener('wuji-hero-splash', ((e: CustomEvent) => {
-        paintHeroSplash(Boolean(e.detail?.isRed));
-      }) as EventListener);
-
-      window.addEventListener('wuji-hero-clear', () => {
-        pctx!.clearRect(0, 0, pw, ph);
-      });
+      window.addEventListener('wuji-hero-splash', ((e: CustomEvent) => paintHeroSplash(Boolean(e.detail?.isRed))) as EventListener);
+      window.addEventListener('wuji-hero-clear', () => pctx!.clearRect(0, 0, pw, ph));
     }
   }
 </script>

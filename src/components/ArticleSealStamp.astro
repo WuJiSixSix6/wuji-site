@@ -1,9 +1,4 @@
 ---
-/**
- * Interactive Chinese Seal Stamp Appreciation Colophon (朱砂落印 · 赏文留痕)
- * Visitors can pick a seal (绝妙 / 已阅 / 清雅) and stamp it onto the scroll
- * with stamp-press animation + global ink/vermilion burst effect.
- */
 interface Props {
   slug: string;
 }
@@ -11,20 +6,20 @@ const { slug } = Astro.props;
 ---
 
 <section
-  class="my-12 p-6 sm:p-7 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] relative overflow-hidden"
+  class="my-12 p-6 border border-[var(--border-hairline)] bg-[var(--bg-surface)] rounded-[3px]"
   data-seal-slug={slug}
   id="wuji-seal-colophon"
 >
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-    <div class="space-y-1.5">
+    <div class="space-y-1">
       <div class="flex items-center gap-2">
-        <span class="wuji-seal w-6 h-6 text-xs">印</span>
-        <span class="text-xs font-mono uppercase tracking-[0.18em] text-[var(--accent-seal)]">
-          Colophon · 展卷落印
+        <span class="wuji-seal w-5 h-5 text-[11px]">印</span>
+        <span class="text-xs font-editorial tracking-[0.2em] text-[var(--text-primary)]">
+          卷尾落印
         </span>
       </div>
-      <p class="text-sm text-[var(--text-secondary)]">
-        若此篇有所启发，不妨择一朱砂印章，在卷尾盖章留念。
+      <p class="text-xs text-[var(--text-muted)]">
+        若此篇有所启发，不妨择一印章留痕。
       </p>
     </div>
 
@@ -32,33 +27,32 @@ const { slug } = Astro.props;
       <button
         type="button"
         data-stamp-word="绝妙"
-        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--accent-seal)]/35 bg-[var(--accent-seal-soft)] text-sm text-[var(--accent-seal)] hover:bg-[var(--accent-seal)] hover:text-[#fbf5ec] transition-all cursor-pointer"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border border-[var(--accent-seal)]/45 text-xs text-[var(--accent-seal)] hover:bg-[var(--accent-seal)] hover:text-[#f6f1e7] transition-colors cursor-pointer"
       >
-        <span class="font-calligraphy text-base">绝妙</span>
-        <span class="text-xs font-mono opacity-80" data-count-for="绝妙">0</span>
+        <span class="font-calligraphy text-sm">绝妙</span>
+        <span class="font-mono opacity-80" data-count-for="绝妙">0</span>
       </button>
       <button
         type="button"
         data-stamp-word="已阅"
-        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] text-sm text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-all cursor-pointer"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border border-[var(--border-strong)] text-xs text-[var(--text-primary)] hover:border-[var(--accent-seal)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
       >
-        <span class="font-calligraphy text-base">已阅</span>
-        <span class="text-xs font-mono opacity-75" data-count-for="已阅">0</span>
+        <span class="font-calligraphy text-sm">已阅</span>
+        <span class="font-mono opacity-75" data-count-for="已阅">0</span>
       </button>
       <button
         type="button"
         data-stamp-word="清雅"
-        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--accent-jade)]/35 bg-[var(--accent-jade-soft)] text-sm text-[var(--accent-jade)] hover:bg-[var(--accent-jade)] hover:text-[#fbf5ec] transition-all cursor-pointer"
+        class="seal-trigger ink-magnetic inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border border-[var(--border-hairline)] text-xs text-[var(--text-secondary)] hover:border-[var(--accent-jade)] hover:text-[var(--accent-jade)] transition-colors cursor-pointer"
       >
-        <span class="font-calligraphy text-base">清雅</span>
-        <span class="text-xs font-mono opacity-80" data-count-for="清雅">0</span>
+        <span class="font-calligraphy text-sm">清雅</span>
+        <span class="font-mono opacity-75" data-count-for="清雅">0</span>
       </button>
     </div>
   </div>
 
-  <!-- Stamped marks gallery -->
   <div id="wuji-stamped-marks" class="mt-4 pt-4 border-t border-[var(--border-hairline)] hidden flex-wrap items-center gap-2.5">
-    <span class="text-xs text-[var(--text-muted)] font-mono mr-1">卷尾已印：</span>
+    <span class="text-xs text-[var(--text-muted)] mr-1">已印：</span>
   </div>
 </section>
 
@@ -82,12 +76,12 @@ const { slug } = Astro.props;
       if (marksWrap && hasAny) {
         marksWrap.classList.remove('hidden');
         marksWrap.classList.add('flex');
-        const label = '<span class="text-xs text-[var(--text-muted)] font-mono mr-1">卷尾已印：</span>';
+        const label = '<span class="text-xs text-[var(--text-muted)] mr-1">已印：</span>';
         const badges = Object.entries(stored)
           .filter(([, c]) => c > 0)
           .map(
             ([w, c]) =>
-              `<span class="wuji-seal px-2.5 py-1 text-sm animate-stamp-pop">${w}${c > 1 ? ` ×${c}` : ''}</span>`
+              `<span class="wuji-seal px-2 py-1 text-xs animate-stamp-pop">${w}${c > 1 ? ` ×${c}` : ''}</span>`
           )
           .join('');
         marksWrap.innerHTML = label + badges;

@@ -2,59 +2,58 @@
 @import "katex/dist/katex.min.css";
 
 /* =========================================================
-   中国水墨丹青色彩体系
-   Default: 宣纸水墨 (Xuan Paper Ink Wash)
-   .dark:   墨夜玄青 (Nocturnal Ink Wash)
+   宋画墨分五彩 · 宣纸策展级色彩与排版体系
+   Default: 宣纸本白 (Raw Xuan Paper & Pine-Soot Ink)
+   .dark:   端砚墨夜 (Antique Inkstone Nocturnal Mode)
    ========================================================= */
 :root {
-  --bg-canvas: #f4efe6;
-  --bg-surface: #fbf8f2;
-  --bg-elevated: #ece5d8;
-  --bg-glass: rgba(247, 242, 233, 0.84);
-  --ink-primary: #181c1f;
-  --text-primary: #181c1f;
-  --text-secondary: #43494e;
-  --text-muted: #767c80;
-  --accent-seal: #b92b27;
-  --accent-seal-soft: rgba(185, 43, 39, 0.1);
-  --accent-gold: #b92b27;
-  --accent-gold-soft: rgba(185, 43, 39, 0.09);
-  --accent-jade: #2b6469;
-  --accent-jade-soft: rgba(43, 100, 105, 0.1);
-  --accent-amber: #9b6f2b;
-  --accent-crimson: #b92b27;
-  --border-hairline: rgba(24, 28, 31, 0.11);
-  --border-strong: rgba(24, 28, 31, 0.24);
-  --shadow-card: 0 18px 44px -24px rgba(24, 28, 31, 0.22);
-  --spotlight-color: rgba(24, 28, 31, 0.065);
-  --font-sans: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
-  --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", Georgia, serif;
-  --font-calligraphy: "Kaiti SC", "STKaiti", "KaiTi", "BiauKai", "DFKai-SB", "Songti SC", serif;
-  --font-display: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", serif;
-  --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", ui-monospace, monospace;
+  --bg-canvas: #f6f3ec;
+  --bg-surface: #fbf9f4;
+  --bg-elevated: #eee9de;
+  --bg-glass: rgba(246, 243, 236, 0.92);
+  --ink-primary: #1c1b18;
+  --text-primary: #1c1b18;
+  --text-secondary: #524f48;
+  --text-muted: #8a8478;
+  --accent-seal: #9e2a22;
+  --accent-seal-soft: rgba(158, 42, 34, 0.075);
+  --accent-gold: #9e2a22;
+  --accent-gold-soft: rgba(158, 42, 34, 0.075);
+  --accent-jade: #465d5e;
+  --accent-jade-soft: rgba(70, 93, 94, 0.08);
+  --accent-amber: #7d6238;
+  --accent-crimson: #9e2a22;
+  --border-hairline: rgba(28, 27, 24, 0.11);
+  --border-strong: rgba(28, 27, 24, 0.24);
+  --spotlight-color: rgba(28, 27, 24, 0.036);
+
+  --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  --font-calligraphy: "Kaiti SC", "STKaiti", "KaiTi", "BiauKai", "Songti SC", serif;
+  --font-display: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, ui-monospace, monospace;
 }
 
 html.dark {
-  --bg-canvas: #0d1013;
-  --bg-surface: #13181d;
-  --bg-elevated: #1a2026;
-  --bg-glass: rgba(16, 20, 24, 0.8);
-  --ink-primary: #ece5d8;
-  --text-primary: #ece5d8;
-  --text-secondary: #a8b0b3;
-  --text-muted: #6e787d;
-  --accent-seal: #de4c44;
-  --accent-seal-soft: rgba(222, 76, 68, 0.15);
-  --accent-gold: #de4c44;
-  --accent-gold-soft: rgba(222, 76, 68, 0.14);
-  --accent-jade: #63b5ac;
-  --accent-jade-soft: rgba(99, 181, 172, 0.13);
-  --accent-amber: #d8ac62;
-  --accent-crimson: #e4635c;
-  --border-hairline: rgba(236, 229, 216, 0.1);
-  --border-strong: rgba(236, 229, 216, 0.22);
-  --shadow-card: 0 22px 54px -22px rgba(0, 0, 0, 0.85);
-  --spotlight-color: rgba(236, 229, 216, 0.075);
+  --bg-canvas: #121210;
+  --bg-surface: #181715;
+  --bg-elevated: #211f1c;
+  --bg-glass: rgba(18, 18, 16, 0.92);
+  --ink-primary: #e7e2d7;
+  --text-primary: #e7e2d7;
+  --text-secondary: #a7a195;
+  --text-muted: #706b61;
+  --accent-seal: #c44a40;
+  --accent-seal-soft: rgba(196, 74, 64, 0.12);
+  --accent-gold: #c44a40;
+  --accent-gold-soft: rgba(196, 74, 64, 0.12);
+  --accent-jade: #7fa09d;
+  --accent-jade-soft: rgba(127, 160, 157, 0.11);
+  --accent-amber: #b89a67;
+  --accent-crimson: #c44a40;
+  --border-hairline: rgba(231, 226, 215, 0.1);
+  --border-strong: rgba(231, 226, 215, 0.22);
+  --spotlight-color: rgba(231, 226, 215, 0.045);
 }
 
 @layer base {
@@ -66,6 +65,7 @@ html.dark {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
 
   body {
@@ -73,65 +73,38 @@ html.dark {
     background-color: var(--bg-canvas);
     color: var(--text-primary);
     overflow-x: hidden;
-    transition: background-color 0.45s ease, color 0.45s ease;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 15% 0%, rgba(43, 100, 105, 0.055), transparent 60%),
-      radial-gradient(ellipse 70% 45% at 88% 12%, rgba(185, 43, 39, 0.04), transparent 55%);
-  }
-
-  html.dark body {
-    background-image:
-      radial-gradient(ellipse 75% 50% at 20% 0%, rgba(99, 181, 172, 0.07), transparent 60%),
-      radial-gradient(ellipse 65% 45% at 85% 10%, rgba(222, 76, 68, 0.06), transparent 55%);
+    transition: background-color 0.35s ease, color 0.35s ease;
   }
 
   ::selection {
-    background-color: rgba(185, 43, 39, 0.22);
+    background-color: rgba(158, 42, 34, 0.16);
     color: var(--text-primary);
   }
 }
 
-/* Subtle Xuan Paper fiber grain overlay */
-.xuan-paper-grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 35;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-}
+.font-editorial { font-family: var(--font-serif); }
+.font-calligraphy { font-family: var(--font-calligraphy); }
 
-html.dark .xuan-paper-grain {
-  opacity: 0.032;
-}
-
-/* Calligraphic font utility */
-.font-calligraphy {
-  font-family: var(--font-calligraphy);
-}
-
-/* Vertical Chinese inscription (立轴题跋) */
+/* Vertical Classical Inscription (立轴题跋) */
 .vertical-inscription {
   writing-mode: vertical-rl;
   text-orientation: upright;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.32em;
 }
 
-/* Authentic Carved Vermilion Seal Stamp (朱砂印章) */
+/* Authentic Traditional Square Seal (古朴朱砂印) */
 .wuji-seal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-calligraphy);
-  color: #fbf5ec;
-  background: linear-gradient(145deg, #c7352f 0%, #a5221f 100%);
-  border: 1.5px solid rgba(255, 232, 224, 0.35);
-  box-shadow:
-    inset 0 0 0 1px rgba(120, 15, 12, 0.4),
-    0 6px 16px -6px rgba(185, 43, 39, 0.55);
-  border-radius: 0.35rem;
+  color: #f6f1e7;
+  background-color: var(--accent-seal);
+  border: 1px solid rgba(246, 241, 231, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(92, 16, 12, 0.28);
+  border-radius: 2px;
   user-select: none;
-  position: relative;
+  line-height: 1;
 }
 
 .wuji-seal-outline {
@@ -140,61 +113,34 @@ html.dark .xuan-paper-grain {
   justify-content: center;
   font-family: var(--font-calligraphy);
   color: var(--accent-seal);
-  border: 1.5px solid var(--accent-seal);
-  background: var(--accent-seal-soft);
-  border-radius: 0.35rem;
-  letter-spacing: 0.12em;
+  border: 1px solid var(--accent-seal);
+  border-radius: 2px;
+  line-height: 1;
 }
 
-/* Ink Brush Divider (水墨笔触分隔线) */
+.ink-rule { height: 1px; border: 0; background: var(--border-hairline); }
 .ink-divider {
-  height: 2px;
+  height: 1px;
   border: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--border-strong) 18%,
-    var(--ink-primary) 50%,
-    var(--border-strong) 82%,
-    transparent 100%
-  );
-  opacity: 0.25;
+  background: linear-gradient(90deg, transparent, var(--border-strong) 20%, var(--border-strong) 80%, transparent);
 }
 
-/* Scroll Glass Surface (lightweight blur for 120fps) */
 .wuji-glass {
   background: var(--bg-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-/* Ink Wash Gradient Text */
-.wuji-gradient-text {
-  background: linear-gradient(125deg, #181c1f 0%, #3d484d 45%, #b92b27 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-html.dark .wuji-gradient-text {
-  background: linear-gradient(125deg, #f5efe3 0%, #98c7c1 52%, #e05248 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* =========================================================
-   Interactive Ink Card + 3D Tilt + Radial Ink Spotlight
-   ========================================================= */
+/* Editorial Paper Card (书页画框，克制锐角与细线，去 AI 气泡感) */
 .wuji-card {
   position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+  border-radius: 3px;
+  transition:
     border-color 0.25s ease,
-    box-shadow 0.28s ease;
+    background-color 0.25s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .wuji-card::after {
@@ -204,36 +150,20 @@ html.dark .wuji-gradient-text {
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
   background: radial-gradient(
-    360px circle at var(--mx, 50%) var(--my, 50%),
+    320px circle at var(--mx, 50%) var(--my, 50%),
     var(--spotlight-color),
-    transparent 68%
+    transparent 65%
   );
 }
 
-.wuji-card:hover::after {
-  opacity: 1;
-}
+.wuji-card:hover::after { opacity: 1; }
+.wuji-card:hover { border-color: var(--border-strong); }
 
-.wuji-card:hover {
-  border-color: var(--border-strong);
-}
-
-.wuji-card-interactive:hover {
-  border-color: rgba(185, 43, 39, 0.42);
-  box-shadow: 0 24px 50px -24px rgba(24, 28, 31, 0.34);
-}
-
-html.dark .wuji-card-interactive:hover {
-  border-color: rgba(222, 76, 68, 0.45);
-  box-shadow: 0 24px 56px -22px rgba(0, 0, 0, 0.9);
-}
-
-/* Scroll-triggered Ink Unfold Reveal (GPU-composited only: opacity + transform) */
 .ink-reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(12px);
   transition:
     opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
@@ -244,271 +174,177 @@ html.dark .wuji-card-interactive:hover {
   transform: translateY(0);
 }
 
-/* Magnetic Button */
 .ink-magnetic {
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
   will-change: transform;
 }
 
-/* =========================================================
-   5 Chinese Ink-Wash Landscape Card Covers
-   ========================================================= */
-.cover-celestial-gold {
-  background:
-    radial-gradient(circle at 82% 24%, rgba(185, 43, 39, 0.45), transparent 32%),
-    radial-gradient(circle at 20% 85%, rgba(43, 100, 105, 0.38), transparent 55%),
-    linear-gradient(155deg, #1b2024 0%, #2a3035 48%, #15191c 100%);
-}
-.cover-jade-nebula {
-  background:
-    radial-gradient(circle at 75% 22%, rgba(99, 181, 172, 0.36), transparent 46%),
-    radial-gradient(circle at 18% 82%, rgba(28, 62, 68, 0.55), transparent 55%),
-    linear-gradient(155deg, #112023 0%, #1b3136 52%, #0f1619 100%);
-}
-.cover-obsidian-aurora {
-  background:
-    radial-gradient(circle at 24% 30%, rgba(145, 160, 168, 0.24), transparent 50%),
-    radial-gradient(circle at 80% 75%, rgba(43, 100, 105, 0.36), transparent 55%),
-    linear-gradient(155deg, #14171a 0%, #24292e 50%, #101316 100%);
-}
-.cover-crimson-ink {
-  background:
-    radial-gradient(circle at 78% 28%, rgba(204, 58, 50, 0.44), transparent 42%),
-    radial-gradient(circle at 18% 76%, rgba(155, 111, 43, 0.3), transparent 52%),
-    linear-gradient(155deg, #211415 0%, #2d1b1d 52%, #141214 100%);
-}
+/* Subtle Monochrome Paper Wash (replaces flashy AI dark gradients) */
+.cover-celestial-gold,
+.cover-jade-nebula,
+.cover-obsidian-aurora,
+.cover-crimson-ink,
 .cover-azure-void {
-  background:
-    radial-gradient(circle at 26% 24%, rgba(76, 128, 156, 0.35), transparent 48%),
-    radial-gradient(circle at 82% 78%, rgba(155, 111, 43, 0.28), transparent 52%),
-    linear-gradient(155deg, #121b22 0%, #1c2a34 52%, #0f1419 100%);
+  background-color: var(--bg-surface);
+  background-image: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
 }
 
 /* =========================================================
-   Editorial Prose Styling (.wuji-prose)
+   Editorial Book Prose (.wuji-prose)
    ========================================================= */
 .wuji-prose {
-  font-size: 1.06rem;
-  line-height: 1.95;
+  font-family: var(--font-sans);
+  font-size: 1.03rem;
+  line-height: 1.96;
   color: var(--text-secondary);
+  letter-spacing: 0.015em;
   word-break: break-word;
 }
 
-.wuji-prose > *:first-child {
-  margin-top: 0;
-}
+.wuji-prose > *:first-child { margin-top: 0; }
 
 .wuji-prose h2 {
   font-family: var(--font-serif);
-  font-size: 1.65rem;
+  font-size: 1.52rem;
   font-weight: 700;
-  line-height: 1.38;
+  line-height: 1.4;
   color: var(--text-primary);
-  margin-top: 3rem;
+  margin-top: 3.1rem;
   margin-bottom: 1.15rem;
-  padding-bottom: 0.6rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--border-hairline);
-  scroll-margin-top: 6rem;
-  position: relative;
-}
-
-.wuji-prose h2::before {
-  content: "▪";
-  color: var(--accent-seal);
-  margin-right: 0.5rem;
-  font-size: 0.78em;
-  vertical-align: 0.08em;
+  scroll-margin-top: 5.5rem;
+  letter-spacing: 0.02em;
 }
 
 .wuji-prose h3 {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.22rem;
   font-weight: 700;
-  line-height: 1.42;
+  line-height: 1.45;
   color: var(--text-primary);
   margin-top: 2.2rem;
-  margin-bottom: 0.85rem;
-  scroll-margin-top: 6rem;
+  margin-bottom: 0.8rem;
+  scroll-margin-top: 5.5rem;
 }
 
 .wuji-prose h4 {
-  font-size: 1.08rem;
-  font-weight: 600;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text-primary);
   margin-top: 1.65rem;
-  margin-bottom: 0.6rem;
-  scroll-margin-top: 6rem;
+  margin-bottom: 0.55rem;
+  scroll-margin-top: 5.5rem;
 }
 
-.wuji-prose p {
-  margin-top: 1.15rem;
-  margin-bottom: 1.15rem;
-}
-
-.wuji-prose strong {
-  color: var(--text-primary);
-  font-weight: 700;
-}
+.wuji-prose p { margin-top: 1.15rem; margin-bottom: 1.15rem; }
+.wuji-prose strong { color: var(--text-primary); font-weight: 600; }
 
 .wuji-prose a {
-  color: var(--accent-seal);
+  color: var(--text-primary);
   text-decoration: underline;
-  text-decoration-color: rgba(185, 43, 39, 0.36);
+  text-decoration-color: var(--accent-seal);
+  text-decoration-thickness: 1px;
   text-underline-offset: 4px;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
-.wuji-prose a:hover {
-  color: var(--accent-jade);
-  text-decoration-color: var(--accent-jade);
-}
+.wuji-prose a:hover { color: var(--accent-seal); }
 
 .wuji-prose ul,
-.wuji-prose ol {
-  margin: 1.15rem 0;
-  padding-left: 1.55rem;
-}
-
+.wuji-prose ol { margin: 1.15rem 0; padding-left: 1.5rem; }
 .wuji-prose ul { list-style-type: disc; }
 .wuji-prose ol { list-style-type: decimal; }
-
-.wuji-prose li {
-  margin: 0.48rem 0;
-  padding-left: 0.25rem;
-}
-
-.wuji-prose li::marker {
-  color: var(--accent-seal);
-}
+.wuji-prose li { margin: 0.48rem 0; padding-left: 0.2rem; }
+.wuji-prose li::marker { color: var(--text-muted); }
 
 .wuji-prose blockquote {
-  margin: 1.7rem 0;
-  padding: 1.05rem 1.4rem;
-  border-left: 3px solid var(--accent-seal);
-  background: var(--accent-seal-soft);
-  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 1.8rem 0;
+  padding: 0.9rem 1.35rem;
+  border-left: 2px solid var(--accent-seal);
+  background: var(--bg-elevated);
   color: var(--text-primary);
   font-family: var(--font-serif);
-  font-size: 1.04rem;
+  font-size: 1.02rem;
 }
 
-.wuji-prose blockquote p {
-  margin: 0.35rem 0;
-}
-
-.wuji-prose hr {
-  border: 0;
-  height: 1px;
-  margin: 2.5rem 0;
-  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
-}
+.wuji-prose blockquote p { margin: 0.35rem 0; }
+.wuji-prose hr { border: 0; height: 1px; margin: 2.6rem 0; background: var(--border-hairline); }
 
 .wuji-prose :not(pre) > code {
   font-family: var(--font-mono);
-  font-size: 0.85em;
-  padding: 0.15em 0.42em;
-  border-radius: 0.35rem;
+  font-size: 0.84em;
+  padding: 0.14em 0.38em;
+  border-radius: 3px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-hairline);
-  color: var(--accent-seal);
+  color: var(--text-primary);
 }
 
 .wuji-prose img {
-  border-radius: 0.85rem;
+  border-radius: 3px;
   border: 1px solid var(--border-hairline);
-  margin: 1.75rem auto;
+  margin: 1.8rem auto;
   max-width: 100%;
   height: auto;
   cursor: zoom-in;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .wuji-prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.75rem 0;
-  font-size: 0.94rem;
+  margin: 1.8rem 0;
+  font-size: 0.92rem;
   display: block;
   overflow-x: auto;
-  border: 1px solid var(--border-hairline);
-  border-radius: 0.75rem;
-  background: var(--bg-surface);
+  border-top: 1.5px solid var(--text-primary);
+  border-bottom: 1.5px solid var(--text-primary);
 }
 
-.wuji-prose thead {
-  background: var(--bg-elevated);
-}
-
+.wuji-prose thead { background: transparent; }
 .wuji-prose th {
   color: var(--text-primary);
+  font-family: var(--font-serif);
   font-weight: 700;
   text-align: left;
-  padding: 0.82rem 1rem;
+  padding: 0.78rem 1rem;
   border-bottom: 1px solid var(--border-strong);
   white-space: nowrap;
 }
-
-.wuji-prose td {
-  padding: 0.74rem 1rem;
-  border-bottom: 1px solid var(--border-hairline);
-  color: var(--text-secondary);
-}
-
+.wuji-prose td { padding: 0.72rem 1rem; border-bottom: 1px solid var(--border-hairline); color: var(--text-secondary); }
 .wuji-prose tbody tr:last-child td { border-bottom: none; }
 
 /* =========================================================
-   Shiki Dual-Theme Code Block Chrome (墨砚代码匣)
+   Shiki Dual-Theme Code Block (素雅刊刻代码框)
    ========================================================= */
 .wuji-code-block {
-  margin: 1.65rem 0;
-  border-radius: 0.9rem;
+  margin: 1.75rem 0;
+  border-radius: 3px;
   overflow: hidden;
   border: 1px solid var(--border-hairline);
-  background: #faf6ee;
-  box-shadow: 0 12px 30px -22px rgba(24, 28, 31, 0.24);
+  background: #f2eee4;
 }
 
-html.dark .wuji-code-block {
-  background: #0b0e11;
-  border-color: rgba(236, 229, 216, 0.11);
-  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
-}
+html.dark .wuji-code-block { background: #141311; }
 
 .wuji-code-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.62rem 1rem;
-  background: rgba(24, 28, 31, 0.045);
+  padding: 0.5rem 0.9rem;
+  background: var(--bg-elevated);
   border-bottom: 1px solid var(--border-hairline);
 }
 
-html.dark .wuji-code-header {
-  background: rgba(236, 229, 216, 0.035);
-}
-
-.wuji-code-dots {
-  display: flex;
-  align-items: center;
-  gap: 0.42rem;
-}
-
-.wuji-code-dots .dot {
-  width: 0.58rem;
-  height: 0.58rem;
-  border-radius: 9999px;
-}
-
-.wuji-code-dots .dot:nth-child(1) { background: rgba(185, 43, 39, 0.78); }
-.wuji-code-dots .dot:nth-child(2) { background: rgba(155, 111, 43, 0.78); }
-.wuji-code-dots .dot:nth-child(3) { background: rgba(43, 100, 105, 0.78); }
+.wuji-code-dots { display: flex; align-items: center; gap: 0.4rem; }
+.wuji-code-dots .dot { display: none; }
 
 .wuji-code-lang {
-  margin-left: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -516,35 +352,25 @@ html.dark .wuji-code-header {
 .wuji-copy-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.24rem 0.68rem;
-  border-radius: 0.42rem;
-  font-size: 0.74rem;
-  font-family: var(--font-sans);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.wuji-copy-btn:hover {
-  color: var(--accent-seal);
-  border-color: var(--accent-seal);
-}
-
-.wuji-copy-btn.copied {
-  color: var(--accent-jade);
-  border-color: var(--accent-jade);
-  background: var(--accent-jade-soft);
-}
+.wuji-copy-btn:hover { color: var(--accent-seal); border-color: var(--accent-seal); }
+.wuji-copy-btn.copied { color: var(--accent-jade); border-color: var(--accent-jade); }
 
 .wuji-code-pre {
   margin: 0 !important;
-  padding: 1.15rem 1.25rem 1.15rem 0 !important;
+  padding: 1.1rem 1.2rem 1.1rem 0 !important;
   overflow-x: auto;
   font-family: var(--font-mono);
-  font-size: 0.87rem;
+  font-size: 0.855rem;
   line-height: 1.72;
   background: transparent !important;
   counter-reset: wuji-line;
@@ -556,100 +382,77 @@ html.dark .wuji-code-header {
   counter-increment: wuji-line;
   content: counter(wuji-line);
   display: inline-block;
-  width: 2.75rem;
+  width: 2.6rem;
   margin-right: 1rem;
   text-align: right;
-  color: rgba(118, 124, 128, 0.45);
+  color: rgba(138, 132, 120, 0.45);
   user-select: none;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
 }
 
-/* Shiki dual theme: default light (Xuan Paper), .dark switches to dark ink */
 .astro-code,
-.astro-code span {
-  color: var(--shiki-light);
-}
-
+.astro-code span { color: var(--shiki-light); }
 html.dark .astro-code,
-html.dark .astro-code span {
-  color: var(--shiki-dark);
-}
+html.dark .astro-code span { color: var(--shiki-dark); }
 
 /* =========================================================
    KaTeX Math Display
    ========================================================= */
 .katex-display {
-  margin: 1.6rem 0 !important;
-  padding: 1.25rem 1.5rem;
+  margin: 1.65rem 0 !important;
+  padding: 1.2rem 1.4rem;
   overflow-x: auto;
   overflow-y: hidden;
   background: var(--bg-surface);
-  border: 1px solid var(--border-hairline);
-  border-radius: 0.85rem;
-  color: var(--text-primary);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-html.dark .katex-display {
-  box-shadow: none;
-}
-
-.katex {
-  font-size: 1.05em;
+  border-top: 1px solid var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
   color: var(--text-primary);
 }
+
+.katex { font-size: 1.04em; color: var(--text-primary); }
 
 /* =========================================================
-   Callouts
+   Callouts (古籍批注框)
    ========================================================= */
 .wuji-callout {
-  margin: 1.65rem 0;
-  padding: 1rem 1.25rem;
-  border-radius: 0.8rem;
+  margin: 1.7rem 0;
+  padding: 0.95rem 1.25rem;
+  border-radius: 2px;
   border: 1px solid var(--border-hairline);
-  border-left-width: 3px;
+  border-left-width: 2.5px;
   background: var(--bg-surface);
 }
 
 .wuji-callout-title {
+  font-family: var(--font-serif);
   font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
 
-.wuji-callout p { margin: 0.35rem 0 !important; font-size: 0.96rem; }
+.wuji-callout p { margin: 0.32rem 0 !important; font-size: 0.95rem; }
 
-.callout-note { border-left-color: #3b6d8c; background: rgba(59, 109, 140, 0.07); }
-.callout-note .wuji-callout-title { color: #3b6d8c; }
-
-.callout-tip { border-left-color: var(--accent-jade); background: var(--accent-jade-soft); }
+.callout-note { border-left-color: var(--accent-jade); }
+.callout-note .wuji-callout-title { color: var(--accent-jade); }
+.callout-tip { border-left-color: var(--accent-jade); }
 .callout-tip .wuji-callout-title { color: var(--accent-jade); }
-
-.callout-important { border-left-color: var(--accent-seal); background: var(--accent-seal-soft); }
+.callout-important { border-left-color: var(--accent-seal); }
 .callout-important .wuji-callout-title { color: var(--accent-seal); }
-
-.callout-warning { border-left-color: var(--accent-amber); background: rgba(155, 111, 43, 0.09); }
+.callout-warning { border-left-color: var(--accent-amber); }
 .callout-warning .wuji-callout-title { color: var(--accent-amber); }
-
-.callout-caution { border-left-color: var(--accent-crimson); background: rgba(185, 43, 39, 0.09); }
-.callout-caution .wuji-callout-title { color: var(--accent-crimson); }
+.callout-caution { border-left-color: var(--accent-seal); }
+.callout-caution .wuji-callout-title { color: var(--accent-seal); }
 
 /* =========================================================
-   Cinema Video Player Card (水墨影画匣)
+   Cinema Video Player Card (素雅影画框)
    ========================================================= */
 .wuji-video-card {
   margin: 2rem 0;
-  border-radius: 0.95rem;
+  border-radius: 3px;
   overflow: hidden;
   border: 1px solid var(--border-hairline);
   background: var(--bg-surface);
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.3s ease, transform 0.3s ease;
-}
-
-.wuji-video-card:hover {
-  border-color: rgba(185, 43, 39, 0.38);
 }
 
 .wuji-video-bar {
@@ -657,51 +460,31 @@ html.dark .katex-display {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.72rem 1.05rem;
+  padding: 0.65rem 1rem;
   border-bottom: 1px solid var(--border-hairline);
   background: var(--bg-elevated);
 }
 
-.wuji-video-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  min-width: 0;
-}
+.wuji-video-meta { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
 
 .wuji-video-badge {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: 0.67rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  padding: 0.2rem 0.55rem;
-  border-radius: 0.35rem;
+  padding: 0.16rem 0.45rem;
+  border-radius: 2px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
 }
 
-.wuji-video-badge-bili {
-  background: rgba(217, 68, 108, 0.14);
-  color: #c93b63;
-  border: 1px solid rgba(217, 68, 108, 0.32);
-}
-
-html.dark .wuji-video-badge-bili {
-  color: #fb7299;
-}
-
-.wuji-video-badge-yt {
-  background: var(--accent-seal-soft);
-  color: var(--accent-seal);
-  border: 1px solid rgba(185, 43, 39, 0.3);
-}
-
-.wuji-video-badge-native {
-  background: var(--accent-jade-soft);
-  color: var(--accent-jade);
-  border: 1px solid rgba(43, 100, 105, 0.3);
-}
+.wuji-video-badge-bili { color: var(--accent-seal); border-color: rgba(158, 42, 34, 0.35); }
+.wuji-video-badge-yt { color: var(--accent-seal); border-color: rgba(158, 42, 34, 0.35); }
+.wuji-video-badge-native { color: var(--accent-jade); border-color: rgba(70, 93, 94, 0.35); }
 
 .wuji-video-title {
+  font-family: var(--font-serif);
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -712,25 +495,18 @@ html.dark .wuji-video-badge-bili {
 
 .wuji-video-link {
   flex-shrink: 0;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--text-muted) !important;
   text-decoration: none !important;
-  padding: 0.22rem 0.55rem;
-  border-radius: 0.4rem;
-  border: 1px solid var(--border-hairline);
-  transition: all 0.2s ease;
 }
 
-.wuji-video-link:hover {
-  color: var(--accent-seal) !important;
-  border-color: var(--accent-seal);
-}
+.wuji-video-link:hover { color: var(--accent-seal) !important; }
 
 .wuji-video-frame {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #0d1013;
+  background: #141311;
 }
 
 .wuji-video-frame iframe,
@@ -743,29 +519,15 @@ html.dark .wuji-video-badge-bili {
   object-fit: contain;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(118, 124, 128, 0.32); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(185, 43, 39, 0.5); }
-
-/* Keyframes */
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-7px); }
-}
-
-@keyframes mist-drift {
-  0%, 100% { transform: translateX(0px) translateY(0px); }
-  50% { transform: translateX(26px) translateY(-6px); }
-}
+::-webkit-scrollbar-thumb { background: rgba(138, 132, 120, 0.3); }
+::-webkit-scrollbar-thumb:hover { background: rgba(158, 42, 34, 0.45); }
 
 @keyframes stamp-pop {
-  0% { transform: scale(1.85) rotate(-14deg); opacity: 0; }
-  65% { transform: scale(0.94) rotate(-6deg); opacity: 1; }
-  100% { transform: scale(1) rotate(-7deg); opacity: 1; }
+  0% { transform: scale(1.65) rotate(-10deg); opacity: 0; }
+  65% { transform: scale(0.96) rotate(-4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-5deg); opacity: 1; }
 }
 
-.animate-float-slow { animation: float-slow 5.5s ease-in-out infinite; }
-.animate-mist-drift { animation: mist-drift 16s ease-in-out infinite; }
-.animate-stamp-pop { animation: stamp-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-stamp-pop { animation: stamp-pop 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards; }

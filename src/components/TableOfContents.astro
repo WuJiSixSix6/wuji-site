@@ -12,52 +12,40 @@ const tocItems = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 {
   tocItems.length > 0 && (
     <aside class="wuji-toc" aria-label="文章目录">
-      <!-- Desktop Sticky TOC -->
-      <div class="hidden xl:block sticky top-24 max-h-[calc(100vh-7.5rem)] overflow-y-auto pr-2">
-        <div class="p-4 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md">
-          <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-[var(--border-hairline)]">
-            <span class="text-xs font-mono uppercase tracking-[0.18em] text-[var(--accent-gold)]">
-              目录 · TOC
-            </span>
-            <span class="text-[11px] font-mono text-[var(--text-muted)]">
-              {tocItems.length} 节
-            </span>
-          </div>
-          <nav>
-            <ul class="space-y-1 text-[13px] leading-snug" id="wuji-toc-list">
-              {tocItems.map((heading) => (
-                <li class={heading.depth === 3 ? 'pl-3.5' : ''}>
-                  <a
-                    href={`#${heading.slug}`}
-                    data-toc-slug={heading.slug}
-                    class="wuji-toc-link block py-1.5 px-2.5 rounded-lg border-l-2 border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/[0.03] transition-all"
-                  >
-                    {heading.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+      <!-- Desktop Sticky Editorial TOC -->
+      <div class="hidden xl:block sticky top-24 max-h-[calc(100vh-7.5rem)] overflow-y-auto pl-4 border-l border-[var(--border-hairline)]">
+        <div class="text-xs font-editorial tracking-[0.2em] text-[var(--text-muted)] mb-3">
+          目录
         </div>
+        <nav>
+          <ul class="space-y-1.5 text-[13px] leading-snug" id="wuji-toc-list">
+            {tocItems.map((heading) => (
+              <li class={heading.depth === 3 ? 'pl-3' : ''}>
+                <a
+                  href={`#${heading.slug}`}
+                  data-toc-slug={heading.slug}
+                  class="wuji-toc-link block py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
 
-      <!-- Mobile / Tablet Collapsible TOC -->
-      <details class="xl:hidden mb-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] overflow-hidden group">
-        <summary class="flex items-center justify-between px-4 py-3 cursor-pointer select-none text-sm font-medium text-[var(--text-primary)]">
-          <span class="flex items-center gap-2">
-            <span class="text-[var(--accent-gold)]">◈</span>
-            文章目录（{tocItems.length} 节）
-          </span>
-          <span class="text-xs font-mono text-[var(--text-muted)] group-open:rotate-180 transition-transform">
-            ▼
-          </span>
+      <!-- Mobile Collapsible TOC -->
+      <details class="xl:hidden mb-8 border border-[var(--border-hairline)] bg-[var(--bg-surface)] rounded-[3px] overflow-hidden group">
+        <summary class="flex items-center justify-between px-4 py-3 cursor-pointer select-none text-sm font-editorial text-[var(--text-primary)]">
+          <span>目录（{tocItems.length} 节）</span>
+          <span class="text-xs font-mono text-[var(--text-muted)] group-open:rotate-180 transition-transform">▼</span>
         </summary>
-        <ul class="px-4 pb-4 pt-1 space-y-1 border-t border-[var(--border-hairline)] text-sm">
+        <ul class="px-4 pb-4 pt-2 space-y-1.5 border-t border-[var(--border-hairline)] text-sm">
           {tocItems.map((heading) => (
             <li class={heading.depth === 3 ? 'pl-4' : ''}>
               <a
                 href={`#${heading.slug}`}
-                class="block py-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors"
+                class="block py-1 text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
               >
                 {heading.text}
               </a>
@@ -82,12 +70,9 @@ const tocItems = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     function setActive(slug: string) {
       tocLinks.forEach((link) => {
         const isCurrent = link.dataset.tocSlug === slug;
-        link.classList.toggle('text-[var(--accent-gold)]', isCurrent);
-        link.classList.toggle('border-[var(--accent-gold)]', isCurrent);
-        link.classList.toggle('bg-[var(--accent-gold-soft)]', isCurrent);
+        link.classList.toggle('text-[var(--accent-seal)]', isCurrent);
         link.classList.toggle('font-medium', isCurrent);
         link.classList.toggle('text-[var(--text-muted)]', !isCurrent);
-        link.classList.toggle('border-transparent', !isCurrent);
       });
     }
 
@@ -98,14 +83,9 @@ const tocItems = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) {
-          setActive(visible[0].target.id);
-        }
+        if (visible.length > 0) setActive(visible[0].target.id);
       },
-      {
-        rootMargin: '-88px 0px -65% 0px',
-        threshold: 0.1,
-      }
+      { rootMargin: '-88px 0px -65% 0px', threshold: 0.1 }
     );
 
     headings.forEach((h) => observer.observe(h));

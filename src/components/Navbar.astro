@@ -1,6 +1,5 @@
 ---
 import { NAV_LINKS, SITE } from '../data/site';
-import WuJiLogo from './WuJiLogo.astro';
 
 const pathname = Astro.url.pathname;
 
@@ -13,144 +12,132 @@ function isActive(href: string) {
 
 <header
   id="wuji-navbar"
-  class="fixed top-0 inset-x-0 z-40 transition-all duration-300"
+  class="fixed top-0 inset-x-0 z-40 wuji-glass border-b border-[var(--border-hairline)]"
 >
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-3.5">
-    <nav
-      aria-label="主导航"
-      class="wuji-glass flex items-center justify-between h-14 px-4 sm:px-5 rounded-2xl border border-[var(--border-hairline)] shadow-[0_12px_32px_-18px_rgba(24,28,31,0.28)]"
+  <nav
+    aria-label="主导航"
+    class="max-w-5xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between"
+  >
+    <!-- Brand: Quiet Songti Name + Single Antique Square Seal -->
+    <a
+      href="/"
+      class="group flex items-center gap-2.5 focus:outline-none"
+      aria-label="无极 WuJi 首页"
     >
-      <!-- Brand -->
-      <a
-        href="/"
-        class="group flex items-center gap-2.5 focus:outline-none"
-        aria-label="无极 WuJi 首页"
+      <span
+        class="text-xl font-bold tracking-[0.18em] text-[var(--text-primary)] font-editorial"
       >
-        <WuJiLogo
-          size={34}
-          class="transition-transform duration-500 group-hover:rotate-12"
-        />
-        <div class="flex items-center gap-2">
-          <span
-            class="text-2xl tracking-wider text-[var(--text-primary)] leading-none font-calligraphy"
-          >
-            {SITE.name}
-          </span>
-          <span
-            class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono tracking-[0.18em] uppercase rounded border border-[var(--accent-seal)]/35 text-[var(--accent-seal)] bg-[var(--accent-seal-soft)]"
-          >
-            {SITE.enName}
-          </span>
-        </div>
-      </a>
+        {SITE.name}
+      </span>
+      <span class="wuji-seal w-5 h-5 text-[11px] group-hover:rotate-6 transition-transform">
+        印
+      </span>
+      <span class="hidden sm:inline text-[11px] font-mono tracking-[0.22em] text-[var(--text-muted)] pl-1 border-l border-[var(--border-hairline)]">
+        {SITE.enName}
+      </span>
+    </a>
 
-      <!-- Desktop Links -->
-      <div class="hidden md:flex items-center gap-1">
-        {
-          NAV_LINKS.map((link) => {
-            const active = isActive(link.href);
-            return (
-              <a
-                href={link.href}
-                class:list={[
-                  'relative px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200',
-                  active
-                    ? 'text-[var(--accent-seal)] bg-[var(--accent-seal-soft)] font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--ink-primary)]/[0.05]',
-                ]}
-              >
-                {link.label}
-              </a>
-            );
-          })
-        }
-      </div>
+    <!-- Desktop Editorial Text Links -->
+    <div class="hidden md:flex items-center gap-7">
+      {
+        NAV_LINKS.map((link) => {
+          const active = isActive(link.href);
+          return (
+            <a
+              href={link.href}
+              class:list={[
+                'relative py-1 text-[14px] tracking-[0.08em] transition-colors',
+                active
+                  ? 'text-[var(--text-primary)] font-medium'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]',
+              ]}
+            >
+              {link.label}
+              {active && (
+                <span class="absolute left-0 right-0 -bottom-[21px] h-[2px] bg-[var(--accent-seal)]" />
+              )}
+            </a>
+          );
+        })
+      }
+    </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- Search Trigger -->
-        <button
-          id="open-search-btn"
-          type="button"
-          class="group flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/75 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-seal)]/45 transition-all cursor-pointer"
-          aria-label="搜索文章 (⌘K)"
-        >
-          <svg class="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent-seal)] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <span class="hidden sm:inline">寻文</span>
-          <kbd
-            class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border-hairline)]"
-          >
-            ⌘K
-          </kbd>
-        </button>
+    <!-- Quiet Utility Controls -->
+    <div class="flex items-center gap-4 text-[13px]">
+      <button
+        id="open-search-btn"
+        type="button"
+        class="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+        aria-label="搜索文章 (⌘K)"
+      >
+        <span>寻文</span>
+        <kbd class="hidden lg:inline text-[10px] font-mono px-1.5 py-0.5 border border-[var(--border-hairline)] rounded-[2px] text-[var(--text-muted)]">
+          ⌘K
+        </kbd>
+      </button>
 
-        <!-- Ink FX Toggle (墨韵开关) -->
-        <button
-          id="ink-fx-toggle-btn"
-          type="button"
-          class="flex items-center gap-1 h-9 px-2.5 rounded-xl border border-[var(--accent-jade)]/35 bg-[var(--accent-jade-soft)] text-xs font-medium text-[var(--accent-jade)] hover:border-[var(--accent-jade)] transition-all cursor-pointer"
-          aria-label="开关水墨互动特效"
-          title="开关水墨互动特效（笔迹、墨晕与飘瓣）"
-        >
-          <span id="ink-fx-dot" class="w-1.5 h-1.5 rounded-full bg-[var(--accent-jade)]"></span>
-          <span class="hidden sm:inline">墨韵</span>
-        </button>
+      <span class="h-3 w-[1px] bg-[var(--border-hairline)]" aria-hidden="true"></span>
 
-        <!-- Theme Toggle (宣纸 / 墨夜) -->
-        <button
-          id="theme-toggle-btn"
-          type="button"
-          class="flex items-center justify-center gap-1 h-9 px-2.5 rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/75 text-xs text-[var(--text-secondary)] hover:text-[var(--accent-seal)] hover:border-[var(--accent-seal)]/45 transition-all cursor-pointer"
-          aria-label="切换宣纸/墨夜主题"
-          title="切换宣纸 / 墨夜"
-        >
-          <span id="theme-label" class="font-medium">墨夜</span>
-        </button>
+      <button
+        id="ink-fx-toggle-btn"
+        type="button"
+        class="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors cursor-pointer"
+        aria-label="开关水墨互动特效"
+        title="开关水墨笔迹与墨晕特效"
+      >
+        <span id="ink-fx-dot" class="w-1.5 h-1.5 rounded-full bg-[var(--accent-seal)]"></span>
+        <span>墨韵</span>
+      </button>
 
-        <!-- Mobile Menu Button -->
-        <button
-          id="mobile-menu-btn"
-          type="button"
-          class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface)]/75 text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
-          aria-label="打开菜单"
-          aria-expanded="false"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
-      </div>
-    </nav>
+      <button
+        id="theme-toggle-btn"
+        type="button"
+        class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+        aria-label="切换宣纸/墨夜主题"
+        title="切换宣纸 / 墨夜"
+      >
+        <span id="theme-label">墨夜</span>
+      </button>
 
-    <!-- Mobile Dropdown -->
-    <div
-      id="mobile-menu"
-      class="hidden md:hidden mt-2 p-2.5 rounded-2xl wuji-glass border border-[var(--border-hairline)] shadow-2xl"
-    >
-      <div class="grid grid-cols-2 gap-1.5">
-        {
-          NAV_LINKS.map((link) => {
-            const active = isActive(link.href);
-            return (
-              <a
-                href={link.href}
-                class:list={[
-                  'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors',
-                  active
-                    ? 'text-[var(--accent-seal)] bg-[var(--accent-seal-soft)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--ink-primary)]/[0.04]',
-                ]}
-              >
-                <span>{link.label}</span>
-                <span class="text-[10px] font-mono uppercase opacity-60">{link.en}</span>
-              </a>
-            );
-          })
-        }
-      </div>
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        class="md:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer pl-1"
+        aria-label="打开菜单"
+        aria-expanded="false"
+      >
+        <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Dropdown -->
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] px-5 py-4"
+  >
+    <div class="grid grid-cols-3 gap-2">
+      {
+        NAV_LINKS.map((link) => {
+          const active = isActive(link.href);
+          return (
+            <a
+              href={link.href}
+              class:list={[
+                'py-2 text-center text-sm border rounded-[2px] transition-colors',
+                active
+                  ? 'border-[var(--accent-seal)] text-[var(--accent-seal)] bg-[var(--accent-seal-soft)]'
+                  : 'border-[var(--border-hairline)] text-[var(--text-secondary)]',
+              ]}
+            >
+              {link.label}
+            </a>
+          );
+        })
+      }
     </div>
   </div>
 </header>
@@ -165,16 +152,14 @@ function isActive(href: string) {
 
   function syncThemeUI() {
     const isDark = document.documentElement.classList.contains('dark');
-    if (themeLabel) {
-      themeLabel.textContent = isDark ? '宣纸' : '墨夜';
-    }
+    if (themeLabel) themeLabel.textContent = isDark ? '宣纸' : '墨夜';
   }
 
   function syncInkFxUI() {
     const enabled = localStorage.getItem('wuji-ink-fx') !== 'off';
     if (fxBtn && fxDot) {
-      fxBtn.classList.toggle('opacity-55', !enabled);
-      fxDot.classList.toggle('opacity-30', !enabled);
+      fxBtn.classList.toggle('opacity-45', !enabled);
+      fxDot.classList.toggle('opacity-20', !enabled);
     }
   }
 

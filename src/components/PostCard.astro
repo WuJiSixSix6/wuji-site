@@ -9,11 +9,11 @@ interface Props {
 
 const { post, compact = false } = Astro.props;
 const { wordCount, readingMinutes } = computePostMeta(post.body);
-const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
+const dateDots = formatDate(post.data.pubDate).replace(/-/g, '.');
 ---
 
 <article
-  class="wuji-card wuji-card-interactive ink-reveal group flex flex-col overflow-hidden h-full"
+  class="wuji-card wuji-card-interactive ink-reveal group flex flex-col justify-between p-6 sm:p-7 h-full"
   data-category={post.data.category}
   data-tags={post.data.tags.join(',')}
   data-title={post.data.title.toLowerCase()}
@@ -21,104 +21,71 @@ const coverClass = `cover-${post.data.coverTheme || 'celestial-gold'}`;
   data-date={post.data.pubDate.valueOf()}
   data-reading={readingMinutes}
 >
-  {
-    !compact && (
-      <a
-        href={`/blog/${post.id}/`}
-        class:list={[
-          'relative block h-40 overflow-hidden border-b border-[var(--border-hairline)]',
-          coverClass,
-        ]}
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <!-- Layered Ink-Wash Mountain Silhouette -->
-        <svg
-          class="absolute inset-x-0 bottom-0 w-full h-24 text-white opacity-[0.12] group-hover:opacity-[0.2] group-hover:scale-105 transition-all duration-700"
-          viewBox="0 0 420 110"
-          preserveAspectRatio="none"
-          fill="currentColor"
+  <div>
+    <!-- Top Editorial Metadata Line -->
+    <div class="flex items-center justify-between gap-3 text-xs text-[var(--text-muted)] mb-4">
+      <div class="flex items-center gap-2">
+        <a
+          href={`/categories/${encodeURIComponent(post.data.category)}/`}
+          class="text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
         >
-          <path d="M0,95 C55,62 95,38 155,58 C215,78 265,20 335,44 C378,58 400,66 420,54 L420,110 L0,110 Z" />
-        </svg>
-        <svg
-          class="absolute inset-x-0 bottom-0 w-full h-16 text-black opacity-[0.32]"
-          viewBox="0 0 420 80"
-          preserveAspectRatio="none"
-          fill="currentColor"
-        >
-          <path d="M0,65 C80,35 140,70 225,42 C305,16 365,54 420,38 L420,80 L0,80 Z" />
-        </svg>
+          「{post.data.category}」
+        </a>
+        {post.data.pinned && (
+          <span class="wuji-seal px-1.5 py-0.5 text-[10px]">置顶</span>
+        )}
+      </div>
+      <time class="font-mono text-[11px] tracking-wider">{dateDots}</time>
+    </div>
 
-        <div class="relative z-10 h-full p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between gap-2">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-black/38 backdrop-blur-md text-[#f4ece0] border border-white/18">
-              {post.data.category}
-            </span>
-            {post.data.pinned && (
-              <span class="wuji-seal px-2 py-0.5 text-xs tracking-widest">
-                置顶
-              </span>
-            )}
-          </div>
-          <div class="flex items-center gap-3 text-[11px] font-mono text-white/80">
-            <span>{formatDate(post.data.pubDate)}</span>
-            <span>·</span>
-            <span>{readingMinutes} 分钟</span>
-            <span>·</span>
-            <span>{wordCount.toLocaleString()} 字</span>
-          </div>
-        </div>
-      </a>
-    )
-  }
-
-  <div class="flex flex-col flex-1 p-5 sm:p-6">
-    {
-      compact && (
-        <div class="flex items-center justify-between gap-2 mb-3 text-xs font-mono text-[var(--text-muted)]">
-          <span class="px-2.5 py-0.5 rounded-lg bg-[var(--accent-seal-soft)] text-[var(--accent-seal)] font-sans font-medium">
-            {post.data.category}
-          </span>
-          <span>{formatDate(post.data.pubDate)}</span>
-        </div>
-      )
-    }
-
+    <!-- Songti Editorial Headline -->
     <h3
-      class="text-lg sm:text-xl font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors line-clamp-2"
-      style="font-family: var(--font-serif);"
+      class="text-lg sm:text-[1.22rem] font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors line-clamp-2 font-editorial"
     >
-      <a href={`/blog/${post.id}`} class="focus:outline-none">
+      <a href={`/blog/${post.id}/`} class="focus:outline-none">
         {post.data.title}
       </a>
     </h3>
 
-    <p class="mt-2.5 text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3 flex-1">
+    <!-- Summary -->
+    <p
+      class:list={[
+        'mt-3 text-[14px] text-[var(--text-secondary)] leading-[1.82]',
+        compact ? 'line-clamp-2' : 'line-clamp-3',
+      ]}
+    >
       {post.data.summary}
     </p>
+  </div>
 
-    <!-- Tags & CTA -->
-    <div class="mt-5 pt-4 border-t border-[var(--border-hairline)] flex items-center justify-between gap-3">
-      <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-        {
-          post.data.tags.slice(0, 3).map((tag) => (
-            <a
-              href={`/tags/${encodeURIComponent(tag)}`}
-              class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--accent-jade)] border border-[var(--border-hairline)] transition-colors"
-            >
-              #{tag}
-            </a>
-          ))
-        }
-      </div>
-      <a
-        href={`/blog/${post.id}/`}
-        class="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-seal)] group-hover:translate-x-0.5 transition-transform"
-      >
-        展卷细读
-        <span aria-hidden="true">→</span>
-      </a>
+  <!-- Quiet Footer Rule -->
+  <div class="mt-6 pt-4 border-t border-[var(--border-hairline)] flex items-center justify-between gap-3 text-xs">
+    <div class="flex items-center gap-2.5 text-[11px] font-mono text-[var(--text-muted)] min-w-0 truncate">
+      <span>{readingMinutes} 分钟</span>
+      {!compact && (
+        <>
+          <span>·</span>
+          <span>{wordCount.toLocaleString()} 字</span>
+        </>
+      )}
+      {!compact && post.data.tags[0] && (
+        <>
+          <span class="hidden sm:inline">·</span>
+          <a
+            href={`/tags/${encodeURIComponent(post.data.tags[0])}/`}
+            class="hidden sm:inline hover:text-[var(--accent-seal)] transition-colors truncate"
+          >
+            #{post.data.tags[0]}
+          </a>
+        </>
+      )}
     </div>
+
+    <a
+      href={`/blog/${post.id}/`}
+      class="shrink-0 text-xs text-[var(--text-primary)] group-hover:text-[var(--accent-seal)] transition-colors tracking-wider"
+    >
+      阅读 →
+    </a>
   </div>
 </article>

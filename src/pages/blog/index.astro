@@ -9,64 +9,52 @@ const tags = getTagsMap(posts);
 ---
 
 <BaseLayout title="全部文章" description="浏览无极 (WuJi) 的全部技术博客、数学笔记与架构文章。">
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16">
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-8 pb-20">
     <!-- Header -->
-    <div class="max-w-2xl">
-      <p class="text-xs font-mono uppercase tracking-[0.22em] text-[var(--accent-gold)]">
-        Articles · 全部文章
-      </p>
-      <h1
-        class="mt-2 text-3xl sm:text-5xl font-bold text-[var(--text-primary)]"
-        style="font-family: var(--font-serif);"
-      >
-        思想与代码的沉淀
+    <header class="pb-8 border-b border-[var(--border-strong)]">
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] font-editorial tracking-wide">
+        文集
       </h1>
-      <p class="mt-3 text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-        共收录 <span class="font-mono text-[var(--accent-gold)]">{posts.length}</span> 篇文章，支持按分类、标签或关键词实时筛选。
+      <p class="mt-3 text-sm text-[var(--text-secondary)]">
+        共收录 <span class="font-mono text-[var(--text-primary)]">{posts.length}</span> 篇文字，可按卷目或关键词即时检索。
       </p>
-    </div>
+    </header>
 
-    <!-- Filter Toolbar -->
-    <div class="mt-10 p-4 sm:p-5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] space-y-4">
+    <!-- Quiet Filter Toolbar -->
+    <div class="mt-7 pb-6 border-b border-[var(--border-hairline)] space-y-5">
       <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-        <!-- Quick Keyword Filter -->
-        <div class="relative flex-1 max-w-md">
-          <svg class="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
+        <div class="relative flex-1 max-w-sm">
           <input
             id="blog-filter-input"
             type="text"
-            placeholder="快速过滤当前列表..."
-            class="w-full pl-10 pr-4 py-2 rounded-xl text-sm bg-[var(--bg-elevated)] border border-[var(--border-hairline)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)]/50"
+            placeholder="过滤标题、摘要或标签…"
+            class="w-full px-3.5 py-2 rounded-[3px] text-sm bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-strong)]"
           />
         </div>
 
-        <!-- Sort + Counter -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4 text-xs text-[var(--text-muted)]">
           <select
             id="blog-sort-select"
             aria-label="排序方式"
-            class="px-3 py-2 rounded-xl text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border-hairline)] text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-gold)]/50 cursor-pointer"
+            class="px-2.5 py-1.5 rounded-[3px] text-xs bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-secondary)] focus:outline-none cursor-pointer"
           >
             <option value="default">默认排序（置顶优先）</option>
             <option value="newest">最新发布</option>
             <option value="oldest">最早发布</option>
-            <option value="longest">深度长文优先</option>
+            <option value="longest">长文优先</option>
           </select>
-          <span id="blog-visible-count" class="text-xs font-mono text-[var(--text-muted)] whitespace-nowrap">
-            显示 {posts.length} 篇
+          <span id="blog-visible-count" class="font-mono whitespace-nowrap">
+            共 {posts.length} 篇
           </span>
         </div>
       </div>
 
-      <!-- Category Pills -->
-      <div class="flex flex-wrap items-center gap-2 pt-1" id="blog-cat-pills">
+      <!-- Category Tabs -->
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm" id="blog-cat-pills">
         <button
           type="button"
           data-cat="ALL"
-          class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-seal)] text-[#fbf5ec]"
+          class="cat-pill pb-1 border-b-2 border-[var(--accent-seal)] text-[var(--text-primary)] font-medium transition-colors cursor-pointer"
         >
           全部 ({posts.length})
         </button>
@@ -75,7 +63,7 @@ const tags = getTagsMap(posts);
             <button
               type="button"
               data-cat={cat.name}
-              class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border-hairline)] hover:border-[var(--accent-gold)]/40 hover:text-[var(--text-primary)]"
+              class="cat-pill pb-1 border-b-2 border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
             >
               {cat.name} ({cat.count})
             </button>
@@ -83,14 +71,14 @@ const tags = getTagsMap(posts);
         }
       </div>
 
-      <!-- Hot Tags Strip -->
-      <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border-hairline)]">
-        <span class="text-[11px] font-mono text-[var(--text-muted)] mr-1">热门标签:</span>
+      <!-- Quiet Tag Links -->
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs font-mono text-[var(--text-muted)]">
+        <span class="font-sans">常用标签：</span>
         {
           tags.slice(0, 10).map((tag) => (
             <a
-              href={`/tags/${encodeURIComponent(tag.name)}`}
-              class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--accent-jade)] border border-[var(--border-hairline)] transition-colors"
+              href={`/tags/${encodeURIComponent(tag.name)}/`}
+              class="hover:text-[var(--accent-seal)] transition-colors"
             >
               #{tag.name}
             </a>
@@ -99,20 +87,20 @@ const tags = getTagsMap(posts);
       </div>
     </div>
 
-    <!-- Posts Grid -->
-    <div id="blog-posts-grid" class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- 2-Column Editorial Posts Grid -->
+    <div id="blog-posts-grid" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
       {posts.map((post) => <PostCard post={post} />)}
     </div>
 
     <!-- Empty State -->
     <div id="blog-empty-state" class="hidden py-20 text-center space-y-2">
-      <p class="text-base text-[var(--text-secondary)]">没有找到符合条件的文章</p>
+      <p class="text-sm text-[var(--text-secondary)]">未检索到符合条件的文字</p>
       <button
         id="blog-reset-btn"
         type="button"
-        class="text-xs font-medium text-[var(--accent-gold)] hover:underline cursor-pointer"
+        class="text-xs text-[var(--accent-seal)] hover:underline cursor-pointer"
       >
-        重置筛选条件
+        重置筛选
       </button>
     </div>
   </section>
@@ -126,7 +114,7 @@ const tags = getTagsMap(posts);
   const emptyEl = document.getElementById('blog-empty-state');
   const resetBtn = document.getElementById('blog-reset-btn');
   const pills = Array.from(document.querySelectorAll<HTMLButtonElement>('.cat-pill'));
-  const cards = grid ? Array.from(grid.children) as HTMLElement[] : [];
+  const cards = grid ? (Array.from(grid.children) as HTMLElement[]) : [];
 
   let activeCat = 'ALL';
 
@@ -134,7 +122,6 @@ const tags = getTagsMap(posts);
     const q = (input?.value || '').trim().toLowerCase();
     const sortMode = sortSelect?.value || 'default';
 
-    // Sort first
     const ordered = [...cards];
     if (sortMode === 'newest') {
       ordered.sort((a, b) => Number(b.dataset.date) - Number(a.dataset.date));
@@ -160,7 +147,7 @@ const tags = getTagsMap(posts);
       if (show) visible++;
     }
 
-    if (countEl) countEl.textContent = `显示 ${visible} 篇`;
+    if (countEl) countEl.textContent = `共 ${visible} 篇`;
     emptyEl?.classList.toggle('hidden', visible > 0);
   }
 
@@ -170,8 +157,8 @@ const tags = getTagsMap(posts);
       pills.forEach((p) => {
         const isCurrent = p === pill;
         p.className = isCurrent
-          ? 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--accent-seal)] text-[#fbf5ec]'
-          : 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border-hairline)] hover:border-[var(--accent-gold)]/40 hover:text-[var(--text-primary)]';
+          ? 'cat-pill pb-1 border-b-2 border-[var(--accent-seal)] text-[var(--text-primary)] font-medium transition-colors cursor-pointer'
+          : 'cat-pill pb-1 border-b-2 border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer';
       });
       applyFilters();
     });

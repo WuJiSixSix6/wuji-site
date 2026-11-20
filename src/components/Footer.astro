@@ -1,86 +1,47 @@
 ---
 import { SITE, NAV_LINKS } from '../data/site';
-import WuJiLogo from './WuJiLogo.astro';
 
 const year = new Date().getFullYear();
 ---
 
-<footer class="relative z-10 mt-24 border-t border-[var(--border-hairline)] bg-[var(--bg-surface)]/55">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-      <!-- Brand Identity -->
-      <div class="space-y-3.5">
+<footer class="relative z-10 mt-20 border-t border-[var(--border-hairline)]">
+  <div class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
+      <div class="space-y-2">
         <a href="/" class="inline-flex items-center gap-2.5">
-          <WuJiLogo size={32} />
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-calligraphy tracking-wider text-[var(--text-primary)] leading-none">
-              {SITE.name}
-            </span>
-            <span class="wuji-seal px-1.5 py-0.5 text-[10px]">印</span>
-          </div>
+          <span class="text-lg font-bold font-editorial tracking-[0.18em] text-[var(--text-primary)]">
+            {SITE.name}
+          </span>
+          <span class="wuji-seal w-4.5 h-4.5 text-[10px]">印</span>
+          <span class="text-xs font-mono tracking-[0.2em] text-[var(--text-muted)]">
+            {SITE.enName}
+          </span>
         </a>
-        <p class="text-sm text-[var(--text-secondary)] leading-relaxed max-w-xs">
-          {SITE.tagline} 宣纸水墨间，记录工程实践、数学原理与技术哲学。
+        <p class="text-xs text-[var(--text-muted)]">
+          {SITE.tagline} 轻点页面可晕染墨韵，顶部「墨韵」可随时启停。
         </p>
       </div>
 
-      <!-- Navigation -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--text-muted)]">
-          Explore · 卷目
-        </h3>
-        <div class="grid grid-cols-2 gap-y-2 gap-x-6 text-sm">
-          {
-            NAV_LINKS.map((link) => (
-              <a
-                href={link.href}
-                class="text-[var(--text-secondary)] hover:text-[var(--accent-seal)] transition-colors"
-              >
-                {link.label}
-              </a>
-            ))
-          }
-        </div>
-      </div>
-
-      <!-- Connections -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-mono uppercase tracking-[0.2em] text-[var(--text-muted)]">
-          Connect · 雅集
-        </h3>
-        <div class="flex flex-wrap items-center gap-2.5">
-          <a
-            href={SITE.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--accent-seal)] hover:border-[var(--accent-seal)]/45 transition-all"
-          >
-            GitHub ↗
-          </a>
-          <a
-            href="/rss.xml"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--accent-jade)] hover:border-[var(--accent-jade)]/45 transition-all"
-          >
-            RSS 订阅
-          </a>
-          <a
-            href="/sitemap-index.xml"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all"
-          >
-            Sitemap
-          </a>
-        </div>
-        <p class="text-xs text-[var(--text-muted)] pt-1">
-          点击页面任意处可晕染水墨 · 顶部「墨韵」可随时开关特效
-        </p>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[var(--text-muted)]">
+        {
+          NAV_LINKS.map((link) => (
+            <a href={link.href} class="hover:text-[var(--text-primary)] transition-colors">
+              {link.label}
+            </a>
+          ))
+        }
+        <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" class="hover:text-[var(--text-primary)] transition-colors">
+          GitHub ↗
+        </a>
+        <a href="/rss.xml" class="hover:text-[var(--accent-seal)] transition-colors">
+          RSS
+        </a>
       </div>
     </div>
 
-    <div class="mt-10 pt-6 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
-      <p>© {year} {SITE.author}. All rights reserved.</p>
-      <p class="font-serif tracking-widest">
-        无极 · 道生一，一生二，二生三，三生万物
-      </p>
+    <div class="mt-8 pt-6 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
+      <p>© {year} {SITE.author}</p>
+      <p class="font-editorial tracking-widest">道生一 · 一生二 · 二生三 · 三生万物</p>
     </div>
   </div>
 </footer>
